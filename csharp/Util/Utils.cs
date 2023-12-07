@@ -87,5 +87,17 @@ namespace AdventOfCode.Util
 
             return value;
         }
+
+        public static Dictionary<T, long> CountBy<T>(IEnumerable<T> values)
+        {
+            Dictionary<T, long> ret = new();
+
+            foreach (T value in values)
+            {
+                ret.Increment(value);
+            }
+
+            return ret;
+        }
     }
 }
