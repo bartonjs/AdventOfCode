@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>AdventOfCode.Data</RootNamespace>
+    <Configurations>Debug;Release;Sample</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Sample|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;DEBUG;SAMPLE</DefineConstants>
+  </PropertyGroup>
+
+</Project>
