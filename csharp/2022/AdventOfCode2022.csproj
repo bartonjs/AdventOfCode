@@ -1,18 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release;Sample</Configurations>
+	<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+	<NoWarn>$(NoWarn);CS8509</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Sample|AnyCPU'">
-    <DefineConstants>$(DefineConstants);TRACE;DEBUG;SAMPLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\2021\AdventOfCode2021.csproj" />
-    <ProjectReference Include="..\2022\AdventOfCode2022.csproj" />
     <ProjectReference Include="..\Util\Util.csproj" />
   </ItemGroup>
+
 </Project>

@@ -9,8 +9,8 @@ namespace AdventOfCode
 {
     internal class Program
     {
-        private const string Year = "2021";
-        private static readonly Type TargetType = typeof(AdventOfCode2021.Solutions.Day1);
+        private const string Year = "2022";
+        private static readonly Type TargetType = typeof(AdventOfCode2022.Solutions.Day01);
 
         private static async Task Main(string[] args)
         {
