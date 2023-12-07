@@ -77,8 +77,7 @@ namespace AdventOfCode2023
                 cards = cards.Trim();
 
                 int cardNum = int.Parse(s.AsSpan(4, colon - 4).Trim());
-                ref int myState = ref CollectionsMarshal.GetValueRefOrAddDefault(winState, cardNum, out _);
-                myState++;
+                int myState = winState.Increment(cardNum);
                 int score = 0;
 
                 foreach (int val in ParseNums(cards.ToString()))
@@ -91,8 +90,7 @@ namespace AdventOfCode2023
 
                 for (int i = 1; i <= score; i++)
                 {
-                    ref int val = ref CollectionsMarshal.GetValueRefOrAddDefault(winState, cardNum + i, out _);
-                    val += myState;
+                    winState.Increment(cardNum + i, myState);
                 }
             }
 

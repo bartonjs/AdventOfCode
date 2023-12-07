@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace AdventOfCode.Util
 {
@@ -53,6 +55,37 @@ namespace AdventOfCode.Util
             }
 
             return list[index];
+        }
+
+        public static TValue Increment<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+            where TValue : INumberBase<TValue>
+        {
+            ref TValue value = ref CollectionsMarshal.GetValueRefOrAddDefault(dictionary, key, out _);
+            value++;
+            return value;
+        }
+
+        public static TValue Increment<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue amount)
+            where TValue : INumberBase<TValue>
+        {
+            ref TValue value = ref CollectionsMarshal.GetValueRefOrAddDefault(dictionary, key, out _);
+            value += amount;
+            return value;
+        }
+
+        public static TValue GetOrAdd<TKey, TValue>(
+            this Dictionary<TKey, TValue> dictionary,
+            TKey key,
+            TValue defaultValue)
+        {
+            ref TValue value = ref CollectionsMarshal.GetValueRefOrAddDefault(dictionary, key, out bool exists);
+
+            if (!exists)
+            {
+                value = defaultValue;
+            }
+
+            return value;
         }
     }
 }
