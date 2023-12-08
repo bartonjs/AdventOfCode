@@ -99,5 +99,52 @@ namespace AdventOfCode.Util
 
             return ret;
         }
+
+        public static TNumber ModMul<TNumber>(TNumber a, TNumber b, TNumber n)
+            where TNumber : IBinaryInteger<TNumber>
+        {
+            return (a * b) % n;
+        }
+
+        public static TNumber GreatestCommonDivisor<TNumber>(TNumber a, TNumber b)
+            where TNumber : IBinaryInteger<TNumber>
+        {
+            TNumber zero = TNumber.Zero;
+
+            while (b != zero)
+            {
+                TNumber t = b;
+                b = a % b;
+                a = t;
+            }
+
+            return a;
+        }
+
+        public static TNumber LeastCommonMultiple<TNumber>(TNumber a, TNumber b)
+            where TNumber : IBinaryInteger<TNumber>
+        {
+            return TNumber.Abs(checked(a * b)) / GreatestCommonDivisor(a, b);
+        }
+
+        public static TNumber LeastCommonMultiple<TNumber>(IEnumerable<TNumber> values)
+            where TNumber : IBinaryInteger<TNumber>
+        {
+            TNumber lcm = TNumber.Zero;
+
+            foreach (TNumber value in values)
+            {
+                if (TNumber.IsZero(lcm))
+                {
+                    lcm = value;
+                }
+                else
+                {
+                    lcm = LeastCommonMultiple(lcm, value);
+                }
+            }
+
+            return lcm;
+        }
     }
 }
