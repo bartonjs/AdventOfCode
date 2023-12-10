@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace AdventOfCode.Util
 {
@@ -266,6 +267,7 @@ namespace AdventOfCode.Util
         }
 
         public int Height => _data.Count;
+        public int Width => _width;
 
         public T[] PushY()
         {
@@ -283,6 +285,23 @@ namespace AdventOfCode.Util
             }
 
             _data.Add(row);
+        }
+
+        public string Print(Func<T, char> display)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            foreach (T[] row in _data)
+            {
+                foreach (T val in row)
+                {
+                    builder.Append(display(val));
+                }
+
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
         }
     }
 }
