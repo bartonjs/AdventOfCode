@@ -31,6 +31,7 @@ namespace AdventOfCode2023
         {
             long ret = 0;
             int line = 1;
+            Cache<State, long> cache = new Cache<State, long>();
 
             foreach (string s in Data.Enumerate())
             {
@@ -55,12 +56,13 @@ namespace AdventOfCode2023
                 Stopwatch sw = Stopwatch.StartNew();
                 Console.WriteLine($"{line}: {s}");
                 Console.WriteLine($"  {new string(unfoldedStatus)}");
-                long count = CWD4(new(), unfoldedStatus, unfoldedLengths);
+                long count = CWD4(cache, unfoldedStatus, unfoldedLengths);
                 Console.WriteLine($"    => {count} ({sw.Elapsed.TotalMilliseconds}ms)");
                 ret += count;
                 line++;
             }
 
+            Console.WriteLine($"Cache hits: {cache.Hits}, misses: {cache.Misses}");
             Console.WriteLine(ret);
         }
 
@@ -311,7 +313,7 @@ namespace AdventOfCode2023
         }
         
         private static long CWD4(
-            Dictionary<State, long> cache,
+            Cache<State, long> cache,
             ReadOnlyMemory<char> line,
             ReadOnlyMemory<int> constraints,
             int currentConstraint = -1)
@@ -330,7 +332,7 @@ namespace AdventOfCode2023
 
             if (line.IsEmpty)
             {
-                return (currentConstraint <= 0 && constraints.IsEmpty) ? 1 : 0;
+                return cache[state] = (currentConstraint <= 0 && constraints.IsEmpty) ? 1 : 0;
             }
 
             char cur = line.Span[0];
