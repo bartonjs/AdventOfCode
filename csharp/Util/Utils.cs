@@ -233,5 +233,17 @@ namespace AdventOfCode.Util
 
             throw new Exception("Ran out of primes");
         }
+
+        public static int IndexOfOrLength<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T>
+        {
+            int idx = span.IndexOf(value);
+
+            if (idx < 0)
+            {
+                return span.Length;
+            }
+
+            return idx;
+        }
     }
 }
