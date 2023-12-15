@@ -245,5 +245,10 @@ namespace AdventOfCode.Util
 
             return idx;
         }
+
+        public static string Print(this DynamicPlane<char> plane)
+        {
+            return plane.Print(c => c);
+        }
     }
 }

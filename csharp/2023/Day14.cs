@@ -246,6 +246,8 @@ namespace AdventOfCode2023
                 }
             }
 
+            Utils.TraceForSample(plane.Print());
+
             Console.WriteLine(ret);
         }
     }
