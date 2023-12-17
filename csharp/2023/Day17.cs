@@ -31,41 +31,21 @@ namespace AdventOfCode2023
             path = new List<Position>();
 #endif
 
-            int min = int.MaxValue;
+            int min = FindCheapestPath(
+                plane,
+                new Position(new(), new()),
+                new Position(new Point(plane.Width - 1, plane.Height - 1), new()),
+                path);
 
-            for (int i = 1; i < 4; i++)
+            if (path is not null)
             {
-                int ret = FindCheapestPath(
-                    plane,
-                    new Position(new(), new()),
-                    new Position(new Point(plane.Width - 1, plane.Height - 1), new(0, i)),
-                    path);
-
-                min = int.Min(min, ret);
-
-                ret = FindCheapestPath(
-                    plane,
-                    new Position(new(), new()),
-                    new Position(new Point(plane.Width - 1, plane.Height - 1), new(i, 0)),
-                    path);
-
-                min = int.Min(min, ret);
+                foreach (Position position in path)
+                {
+                    Console.WriteLine($"{position.At} -- {position.Vector} -- {plane[position.At]}");
+                }
             }
 
             Console.WriteLine(min);
-
-            //int ret2 = 0;
-
-            //if (path is not null)
-            //{
-            //    foreach (Position position in path)
-            //    {
-            //        Console.WriteLine($"{position.At} -- {position.Vector} -- {plane[position.At]}");
-            //        ret2 += plane[position.At];
-            //    }
-
-            //    Console.WriteLine($"Path sum: {ret2}");
-            //}
         }
 
         private struct Position : IEquatable<Position>
@@ -103,7 +83,8 @@ namespace AdventOfCode2023
                 end,
                 Neighbors,
                 static (candidate, end, world) => candidate.At.ManhattanDistance(end.At),
-                pathToFill: route);
+                pathToFill: route,
+                customEquals: (p1, p2) => p1.At.Equals(p2.At));
 
             static IEnumerable<(Position, int Cost)> Neighbors(Position from, Plane<int> world)
             {
@@ -189,26 +170,11 @@ namespace AdventOfCode2023
             path = new List<Position>();
 #endif
 
-            int min = int.MaxValue;
-
-            for (int i = 4; i < 10; i++)
-            {
-                int ret = FindCheapestPath2(
-                    plane,
-                    new Position(new(), new()),
-                    new Position(new Point(plane.Width - 1, plane.Height - 1), new(0, i)),
-                    path);
-
-                min = int.Min(min, ret);
-
-                ret = FindCheapestPath2(
-                    plane,
-                    new Position(new(), new()),
-                    new Position(new Point(plane.Width - 1, plane.Height - 1), new(i, 0)),
-                    path);
-
-                min = int.Min(min, ret);
-            }
+            int min = FindCheapestPath2(
+                plane,
+                new Position(new(), new()),
+                new Position(new Point(plane.Width - 1, plane.Height - 1), new()),
+                path);
 
             Console.WriteLine(min);
         }
@@ -221,7 +187,8 @@ namespace AdventOfCode2023
                 end,
                 Neighbors,
                 static (candidate, end, world) => candidate.At.ManhattanDistance(end.At),
-                pathToFill: route);
+                pathToFill: route,
+                customEquals: (p1, p2) => p1.At.Equals(p2.At) && int.Max(int.Abs(p1.Vector.X), int.Abs(p1.Vector.Y)) >= 4);
 
             static IEnumerable<(Position, int Cost)> Neighbors(Position from, Plane<int> world)
             {

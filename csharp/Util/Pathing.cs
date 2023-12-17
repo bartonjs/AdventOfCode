@@ -24,7 +24,8 @@ namespace AdventOfCode.Util
             AStarNeighbors<TWorld, TPosition, TCost> neighbors,
             AStarEstimator<TWorld, TPosition, TCost> estimator,
             List<TPosition> pathToFill = null,
-            Dictionary<TPosition, TCost> gScore = null)
+            Dictionary<TPosition, TCost> gScore = null,
+            Func<TPosition, TPosition, bool> customEquals = null)
             where TCost : INumber<TCost>, IMinMaxValue<TCost>
             where TPosition : IEquatable<TPosition>
         {
@@ -45,6 +46,15 @@ namespace AdventOfCode.Util
                 if (current.Equals(end))
                 {
                     break;
+                }
+
+                if (customEquals is not null)
+                {
+                    if (customEquals(current, end))
+                    {
+                        end = current;
+                        break;
+                    }
                 }
 
                 fScore.Remove(current);
