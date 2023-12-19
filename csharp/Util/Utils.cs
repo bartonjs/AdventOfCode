@@ -250,5 +250,93 @@ namespace AdventOfCode.Util
         {
             return plane.Print(c => c);
         }
+
+        /// <summary>
+        /// Computes the area of a polygon described by a series of points.
+        /// </summary>
+        /// <param name="points">
+        ///   The points defining the vertices of the polygon.
+        /// </param>
+        /// <param name="strokeWidth">
+        ///   <c>0</c> for classic bounded area,
+        ///   a positive value for including the width of the stroke in the calculation,
+        ///   a negative value for reducing it.
+        /// </param>
+        /// <param name="perimeter">
+        ///   The perimeter of the polygon, for the stroke-width area offset calculation.
+        /// </param>
+        /// <returns>
+        ///   The area of the polygon.
+        /// </returns>
+        public static long Area(List<Point> points, int strokeWidth = 0, int perimeter = 0)
+        {
+            // The shoelace algorithm
+            int n = points.Count;
+            long area = 0;
+
+            for (int i = 0; i < n - 1; i++)
+            {
+                area += points[i].X * points[i + 1].Y - points[i + 1].X * points[i].Y;
+            }
+
+            area = (area + points[n - 1].X * points[0].Y - points[0].X * points[n - 1].Y) / 2;
+            area = long.Abs(area);
+
+            // Inclusive of the width of the stroke.
+            // Might only work for rectilinear shapes?
+            if (strokeWidth != 0)
+            {
+                long cornerPart = strokeWidth * strokeWidth;
+                long borderPart = perimeter * strokeWidth / 2;
+
+                area += cornerPart + borderPart;
+            }
+
+            return area;
+        }
+
+        /// <summary>
+        /// Computes the area of a polygon described by a series of points.
+        /// </summary>
+        /// <param name="points">
+        ///   The points defining the vertices of the polygon.
+        /// </param>
+        /// <param name="strokeWidth">
+        ///   <c>0</c> for classic bounded area,
+        ///   a positive value for including the width of the stroke in the calculation,
+        ///   a negative value for reducing it.
+        /// </param>
+        /// <param name="perimeter">
+        ///   The perimeter of the polygon, for the stroke-width area offset calculation.
+        /// </param>
+        /// <returns>
+        ///   The area of the polygon.
+        /// </returns>
+        public static long Area(List<LongPoint> points, int strokeWidth = 0, int perimeter = 0)
+        {
+            // The shoelace algorithm
+            int n = points.Count;
+            long area = 0;
+
+            for (int i = 0; i < n - 1; i++)
+            {
+                area += points[i].X * points[i + 1].Y - points[i + 1].X * points[i].Y;
+            }
+
+            area = (area + points[n - 1].X * points[0].Y - points[0].X * points[n - 1].Y) / 2;
+            area = long.Abs(area);
+
+            // Inclusive of the width of the stroke.
+            // Might only work for rectilinear shapes?
+            if (strokeWidth != 0)
+            {
+                long cornerPart = strokeWidth * strokeWidth;
+                long borderPart = perimeter * strokeWidth / 2;
+
+                area += cornerPart + borderPart;
+            }
+
+            return area;
+        }
     }
 }
