@@ -141,6 +141,21 @@ namespace AdventOfCode.Util
             return value;
         }
 
+        public static TValue GetOrAdd<TKey, TValue>(
+            this Dictionary<TKey, TValue> dictionary,
+            TKey key,
+            Func<TValue> defaultValue)
+        {
+            ref TValue value = ref CollectionsMarshal.GetValueRefOrAddDefault(dictionary, key, out bool exists);
+
+            if (!exists)
+            {
+                value = defaultValue();
+            }
+
+            return value;
+        }
+
         public static Dictionary<T, long> CountBy<T>(IEnumerable<T> values)
         {
             Dictionary<T, long> ret = new();
