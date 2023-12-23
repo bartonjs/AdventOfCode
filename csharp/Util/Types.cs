@@ -4,8 +4,20 @@ using System.Text;
 
 namespace AdventOfCode.Util
 {
-    public struct Point : IEquatable<Point>
+    [Flags]
+    public enum Directions2D
     {
+        None,
+        North = 1,
+        East = 2,
+        South = 4,
+        West = 8,
+    }
+
+    public struct Point : IEquatable<Point>, IComparable<Point>
+    {
+        public const Directions2D AllDirections = (Directions2D)15;
+
         public int X;
         public int Y;
 
@@ -58,6 +70,61 @@ namespace AdventOfCode.Util
         public Point East()
         {
             return new Point(X + 1, Y);
+        }
+
+        public Point GetNeighbor(Directions2D direction)
+        {
+            return direction switch
+            {
+                Directions2D.North => North(),
+                Directions2D.East => East(),
+                Directions2D.South => South(),
+                Directions2D.West => West(),
+                _ => throw new ArgumentException("Exactly one direction bit must be set", nameof(direction)),
+            };
+        }
+
+        public IEnumerable<Point> GetNeighbors(Directions2D directions)
+        {
+            if ((directions & ~AllDirections) != 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(directions), "Unknown direction(s) asserted.");
+            }
+
+            int rem = (int)directions;
+
+            if ((rem & 1) != 0)
+            {
+                yield return North();
+            }
+
+            rem >>= 1;
+
+            if ((rem & 1) != 0)
+            {
+                yield return East();
+            }
+
+            rem >>= 1;
+            
+            if ((rem & 1) != 0)
+            {
+                yield return South();
+            }
+
+            rem >>= 1;
+            
+            if ((rem & 1) != 0)
+            {
+                yield return West();
+            }
+        }
+
+        public int CompareTo(Point other)
+        {
+            var xComparison = X.CompareTo(other.X);
+            if (xComparison != 0) return xComparison;
+            return Y.CompareTo(other.Y);
         }
     }
 
