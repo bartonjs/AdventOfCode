@@ -122,7 +122,7 @@ namespace AdventOfCode.Util
 
         public int CompareTo(Point other)
         {
-            var xComparison = X.CompareTo(other.X);
+            int xComparison = X.CompareTo(other.X);
             if (xComparison != 0) return xComparison;
             return Y.CompareTo(other.Y);
         }

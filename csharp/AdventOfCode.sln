@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34322.80
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventOfCode", "Runner\AdventOfCode.csproj", "{072C079B-C3B3-4A99-9DFC-255C3A69618C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode", "Runner\AdventOfCode.csproj", "{072C079B-C3B3-4A99-9DFC-255C3A69618C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Util", "Util\Util.csproj", "{A989955E-25BD-4597-96B8-1D4AAA49FBAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Util", "Util\Util.csproj", "{A989955E-25BD-4597-96B8-1D4AAA49FBAF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "..\Data\Data.csproj", "{43BC7357-5B89-468D-94AF-AB4811C782CB}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode2022", "2022\AdventOfCode2022.csproj", "{6F61685C-6B81-4FCF-AA7E-0849CE3417A8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode2023", "2023\AdventOfCode2023.csproj", "{AB4A2007-7EB9-4D01-A7C9-133A75D7F100}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode2024", "2024\AdventOfCode2024.csproj", "{C079398B-1F07-4BFE-90F8-148EB9DBB454}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,12 @@ Global
 		{AB4A2007-7EB9-4D01-A7C9-133A75D7F100}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB4A2007-7EB9-4D01-A7C9-133A75D7F100}.Sample|Any CPU.ActiveCfg = Sample|Any CPU
 		{AB4A2007-7EB9-4D01-A7C9-133A75D7F100}.Sample|Any CPU.Build.0 = Sample|Any CPU
+		{C079398B-1F07-4BFE-90F8-148EB9DBB454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C079398B-1F07-4BFE-90F8-148EB9DBB454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C079398B-1F07-4BFE-90F8-148EB9DBB454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C079398B-1F07-4BFE-90F8-148EB9DBB454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C079398B-1F07-4BFE-90F8-148EB9DBB454}.Sample|Any CPU.ActiveCfg = Sample|Any CPU
+		{C079398B-1F07-4BFE-90F8-148EB9DBB454}.Sample|Any CPU.Build.0 = Sample|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
