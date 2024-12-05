@@ -353,5 +353,30 @@ namespace AdventOfCode.Util
 
             return area;
         }
+
+        /// <param name="moveFunc">Receives (candidate, previous) and returns true if candidate should be moved earlier.</param>
+        /// <returns><see langword="true"?> if the list changed; otherwise, <see langword="false" /></returns>
+        public static bool PredicateSort<T>(this List<T> list, Func<T, T, bool> moveFunc)
+        {
+            bool modified = false;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                T item = list[i];
+
+                for (int j = 0; j < i; j++)
+                {
+                    if (moveFunc(item, list[j]))
+                    {
+                        modified = true;
+                        list.RemoveAt(i);
+                        list.Insert(j, item);
+                        break;
+                    }
+                }
+            }
+
+            return modified;
+        }
     }
 }

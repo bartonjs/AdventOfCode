@@ -44,6 +44,16 @@ namespace AdventOfCode2024
             return (orderRules, updates);
         }
 
+        private static bool MoveEarlier(long candidate, long prev, Dictionary<long, HashSet<long>> rules)
+        {
+            if (rules.TryGetValue(candidate, out HashSet<long> set))
+            {
+                return set.Contains(prev);
+            }
+
+            return false;
+        }
+
         internal static void Problem1()
         {
             long ret = 0;
@@ -52,27 +62,12 @@ namespace AdventOfCode2024
 
             foreach (List<long> update in updates)
             {
-                bool valid = true;
-
-                for (var i = 0; i < update.Count; i++)
-                {
-                    var item = update[i];
-                    if (orderRules.TryGetValue(item, out HashSet<long> before))
-                    {
-                        if (update.Take(i - 1).Any(before.Contains))
-                        {
-                            valid = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (valid)
+                if (!update.PredicateSort((cur, prev) => MoveEarlier(cur, prev, orderRules)))
                 {
                     ret += update[update.Count / 2];
                 }
             }
-
+            
             Console.WriteLine(ret);
         }
 
@@ -84,27 +79,7 @@ namespace AdventOfCode2024
 
             foreach (List<long> update in updates)
             {
-                bool modified = false;
-
-                for (var i = 0; i < update.Count; i++)
-                {
-                    var item = update[i];
-                    if (orderRules.TryGetValue(item, out HashSet<long> before))
-                    {
-                        for (int j = 0; j < i; j++)
-                        {
-                            if (before.Contains(update[j]))
-                            {
-                                update.RemoveAt(i);
-                                update.Insert(j, item);
-                                modified = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (modified)
+                if (update.PredicateSort((cur, prev) => MoveEarlier(cur, prev, orderRules)))
                 {
                     ret += update[update.Count / 2];
                 }
