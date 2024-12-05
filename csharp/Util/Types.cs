@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace AdventOfCode.Util
@@ -369,6 +370,33 @@ namespace AdventOfCode.Util
             }
 
             return builder.ToString();
+        }
+    }
+
+    public sealed class KeyedSets<T>
+    {
+        private readonly Dictionary<T, HashSet<T>> _data = new();
+
+        public bool Add(T key, T item)
+        {
+            ref HashSet<T> set = ref CollectionsMarshal.GetValueRefOrAddDefault(_data, key, out _);
+
+            if (set is null)
+            {
+                set = new HashSet<T>();
+            }
+
+            return set.Add(item);
+        }
+
+        public bool Contains(T key, T item)
+        {
+            if (_data.TryGetValue(key, out HashSet<T> set))
+            {
+                return set.Contains(item);
+            }
+
+            return false;
         }
     }
 }
