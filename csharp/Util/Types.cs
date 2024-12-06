@@ -249,6 +249,7 @@ namespace AdventOfCode.Util
         public abstract ref T this[Point point] { get; }
         public abstract bool ContainsPoint(Point point);
         public abstract IEnumerable<Point> AllPoints();
+        public abstract Plane<T> Clone();
 
         public bool TryGetValue(Point point, out T value)
         {
@@ -261,6 +262,7 @@ namespace AdventOfCode.Util
             value = default;
             return false;
         }
+
     }
 
     public sealed class FixedPlane<T> : Plane<T>
@@ -292,6 +294,13 @@ namespace AdventOfCode.Util
                     yield return new Point(x, y);
                 }
             }
+        }
+
+        public override Plane<T> Clone()
+        {
+            FixedPlane<T> clone = new FixedPlane<T>(_width, _height);
+            Array.Copy(_data, clone._data, _data.Length);
+            return clone;
         }
     }
 
@@ -370,6 +379,18 @@ namespace AdventOfCode.Util
             }
 
             return builder.ToString();
+        }
+
+        public override Plane<T> Clone()
+        {
+            DynamicPlane<T> clone = new(_width, _data.Count);
+
+            foreach (T[] arr in _data)
+            {
+                clone._data.Add((T[])arr.Clone());
+            }
+
+            return clone;
         }
     }
 
