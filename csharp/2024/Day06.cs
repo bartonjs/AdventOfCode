@@ -69,7 +69,7 @@ namespace AdventOfCode2024
             Console.WriteLine(covered.Count);
         }
 
-        internal static void Problem2x()
+        internal static void Problem2()
         {
             long ret = 0;
             (Plane<char> world, Point start) = Load();
@@ -104,6 +104,8 @@ namespace AdventOfCode2024
                 Utils.TraceForSample($"Pos: {pos}, Facing: {facing}");
             }
 
+            HashSet<(Point, Directions2D)> states = new HashSet<(Point, Directions2D)>();
+
             foreach (Point candidate in covered)
             {
                 if (candidate == start)
@@ -114,7 +116,7 @@ namespace AdventOfCode2024
                 char existing = world[candidate];
                 world[candidate] = '#';
                 
-                if (InfiniteCycle(world, start, Directions2D.North))
+                if (InfiniteCycle(world, start, Directions2D.North, states))
                 {
                     ret++;
                 }
@@ -126,9 +128,9 @@ namespace AdventOfCode2024
             Console.WriteLine(ret);
         }
 
-        private static bool InfiniteCycle(Plane<char> world, Point pos, Directions2D facing)
+        private static bool InfiniteCycle(Plane<char> world, Point pos, Directions2D facing, HashSet<(Point, Directions2D)> states)
         {
-            HashSet<(Point, Directions2D)> states = new();
+            states.Clear();
             states.Add((pos, facing));
 
             while (true)
