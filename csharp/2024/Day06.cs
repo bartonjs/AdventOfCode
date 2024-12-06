@@ -69,7 +69,7 @@ namespace AdventOfCode2024
             Console.WriteLine(covered.Count);
         }
 
-        internal static void Problem2()
+        internal static void Problem2x()
         {
             long ret = 0;
             (Plane<char> world, Point start) = Load();
@@ -111,13 +111,15 @@ namespace AdventOfCode2024
                     continue;
                 }
 
-                Plane<char> copy = world.Clone();
-                copy[candidate] = '#';
-
-                if (InfiniteCycle(copy, start, Directions2D.North))
+                char existing = world[candidate];
+                world[candidate] = '#';
+                
+                if (InfiniteCycle(world, start, Directions2D.North))
                 {
                     ret++;
                 }
+
+                world[candidate] = existing;
 
             }
 
