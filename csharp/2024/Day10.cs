@@ -52,32 +52,32 @@ namespace AdventOfCode2024
 
             foreach (Point p in trailheads)
             {
-                Pathing.BreadthFirstSearch(
-                    world,
-                    p,
-                    maybe =>
-                    {
-                        if (world.TryGetValue(maybe, out int val) && val == 9)
-                        {
-                            reached.Add(maybe);
-                        }
-
-                        return false;
-                    },
-                    (point, world) =>
-                    {
-                        int cur = world[point];
-
-                        return point
-                            .GetNeighbors(NEWS).Where(p =>
-                                world.TryGetValue(p, out int val) && val == cur + 1);
-                    });
-
+                Discover(p, world, reached);
                 ret += reached.Count;
                 reached.Clear();
             }
 
             Console.WriteLine(ret);
+
+            static void Discover(Point p, DynamicPlane<int> world, HashSet<Point> reached)
+            {
+                int curP1 = world[p] + 1;
+                long ret = 0;
+
+                if (curP1 > 9)
+                {
+                    reached.Add(p);
+                    return;
+                }
+
+                foreach (Point neighbor in p.GetNeighbors(NEWS))
+                {
+                    if (world.TryGetValue(neighbor, out int val) && val == curP1)
+                    {
+                        Discover(neighbor, world, reached);
+                    }
+                }
+            }
         }
 
         internal static void Problem2()
