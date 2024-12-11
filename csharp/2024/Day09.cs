@@ -191,5 +191,72 @@ namespace AdventOfCode2024
 
             Console.WriteLine(ret);
         }
+
+        internal static void Problem3()
+        {
+            string s = Data.Enumerate().Single();
+            (int Offset, int Length)[] dataBlocks = new (int, int)[(s.Length + 1) / 2];
+            (int Offset, int Length)[] freeBlocks = new (int, int)[dataBlocks.Length];
+
+            bool data = true;
+            int idx = 0;
+            int pos = 0;
+
+            foreach (char c in s)
+            {
+                int len = c - '0';
+
+                if (data)
+                {
+                    dataBlocks[idx] = (pos, len);
+                    data = false;
+                }
+                else
+                {
+                    freeBlocks[idx] = (pos, len);
+                    idx++;
+                    data = true;
+                }
+
+                pos += len;
+            }
+
+            for (int dataIdx = dataBlocks.Length - 1; dataIdx > 0; dataIdx--)
+            {
+                ref var dataBlock = ref dataBlocks[dataIdx];
+
+                for (int freeIdx = 0; freeIdx <= freeBlocks.Length; freeIdx++)
+                {
+                    ref var freeBlock = ref freeBlocks[freeIdx];
+
+                    if (freeBlock.Offset >= dataBlock.Offset)
+                    {
+                        break;
+                    }
+
+                    if (freeBlock.Length >= dataBlock.Length)
+                    {
+                        dataBlock.Offset = freeBlock.Offset;
+                        freeBlock.Offset += dataBlock.Length;
+                        freeBlock.Length -= dataBlock.Length;
+                        break;
+                    }
+                }
+            }
+
+            long ret = 0;
+
+            for (int dataIndex = 0; dataIndex < dataBlocks.Length; dataIndex++)
+            {
+                var dataBlock = dataBlocks[dataIndex];
+
+                for (int i = 0; i < dataBlock.Length; i++)
+                {
+                    ret += (dataBlock.Offset + i) * dataIndex;
+                }
+            }
+
+            Console.WriteLine(ret);
+        }
     }
 }
