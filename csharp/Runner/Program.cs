@@ -84,7 +84,7 @@ namespace AdventOfCode
             string dataDirParent = AppContext.BaseDirectory;
             string dataDir = Path.Join(dataDirParent, "Data");
 
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= 6; i++)
             {
                 if (!Directory.Exists(dataDir))
                 {
