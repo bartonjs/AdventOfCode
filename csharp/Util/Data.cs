@@ -17,21 +17,24 @@ namespace AdventOfCode.Util
             }
         }
 
-        public static List<long> ToLongList(this string commaSeparated, char separator = ',')
+        public static List<long> ToLongList(this string separated, char separator = ',')
         {
-            ReadOnlySpan<char> span = commaSeparated;
-            int comma = commaSeparated.IndexOf(separator);
-            List<long> list = new List<long>();
+            return new List<long>(AsLongs(separated, separator));
+        }
+
+        public static IEnumerable<long> AsLongs(this string separated, char separator = ',')
+        {
+            int comma = separated.IndexOf(separator);
+            int lastComma = 0;
 
             while (comma >= 0)
             {
-                list.Add(long.Parse(span.Slice(0, comma)));
-                span = span.Slice(comma + 1);
-                comma = span.IndexOf(separator);
+                yield return long.Parse(separated.AsSpan(lastComma, comma - lastComma));
+                lastComma = comma + 1;
+                comma = separated.IndexOf(separator, lastComma);
             }
 
-            list.Add(long.Parse(span));
-            return list;
+            yield return long.Parse(separated.AsSpan(lastComma));
         }
     }
 }
