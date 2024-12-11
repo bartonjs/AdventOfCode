@@ -17,17 +17,17 @@ namespace AdventOfCode.Util
             }
         }
 
-        internal static List<long> ToLongList(this string commaSeparated)
+        public static List<long> ToLongList(this string commaSeparated, char separator = ',')
         {
             ReadOnlySpan<char> span = commaSeparated;
-            int comma = commaSeparated.IndexOf(',');
+            int comma = commaSeparated.IndexOf(separator);
             List<long> list = new List<long>();
 
             while (comma >= 0)
             {
                 list.Add(long.Parse(span.Slice(0, comma)));
                 span = span.Slice(comma + 1);
-                comma = span.IndexOf(',');
+                comma = span.IndexOf(separator);
             }
 
             list.Add(long.Parse(span));
