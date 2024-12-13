@@ -122,7 +122,6 @@ namespace AdventOfCode2024
             foreach (Scenario scenario in Load())
             {
                 ret += Cost(scenario.A, scenario.B, scenario.Win + offset);
-                Console.WriteLine(scenario.Win);
             }
 
             Console.WriteLine(ret);
