@@ -127,6 +127,16 @@ namespace AdventOfCode.Util
             if (xComparison != 0) return xComparison;
             return Y.CompareTo(other.Y);
         }
+
+        public static Point operator +(Point a, Point b)
+        {
+            return new Point(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static Point operator -(Point a, Point b)
+        {
+            return new Point(a.X - b.X, a.Y - b.Y);
+        }
     }
 
     public struct LongPoint : IEquatable<LongPoint>
@@ -164,6 +174,16 @@ namespace AdventOfCode.Util
 
         public static bool operator ==(LongPoint a, LongPoint b) => a.Equals(b);
         public static bool operator !=(LongPoint a, LongPoint b) => !a.Equals(b);
+
+        public static LongPoint operator +(LongPoint a, LongPoint b)
+        {
+            return new LongPoint(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static LongPoint operator -(LongPoint a, LongPoint b)
+        {
+            return new LongPoint(a.X - b.X, a.Y - b.Y);
+        }
     }
 
     public struct Point3 : IEquatable<Point3>
