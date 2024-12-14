@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -118,49 +119,65 @@ namespace AdventOfCode2024
             }
 
             int i = 0;
-            Point borderStart = new Point(24, 31);
-            Point borderStartRight = new Point(54, 31);
-            Point borderStop = new Point(24, 63);
-            Point borderStopRight = new Point(54, 63);
-
             StringBuilder line = new StringBuilder();
 
-            //using StreamWriter writer = new StreamWriter(File.Open("output.txt", FileMode.Truncate, FileAccess.Write, FileShare.Read);
-            TextWriter writer = Console.Out;
-            
+            Span<bool> world = new bool[WorldX * WorldY];
+            ReadOnlySpan<bool> borderStart = [false, true, true, true, true, true, true, true];
+            ReadOnlySpan<bool> FT = [false, true];
+            ReadOnlySpan<bool> TF = [true, false];
+
             while (i < WorldY * WorldX)
             {
-                if (positions.Any(p => p == borderStart) && positions.Any(p => p == borderStartRight) &&
-                    positions.Any(p => p == borderStop) && positions.Any(p => p == borderStopRight))
+                world.Clear();
+
+                foreach (Point position in positions)
                 {
-                    writer.WriteLine(i);
-
-                    bool[,] world = new bool[WorldX, WorldY];
-
-                    foreach (Point position in positions)
-                    {
-                        world[position.X, position.Y] = true;
-                    }
-
-                    for (int row = 0; row < WorldY; row++)
-                    {
-                        line.Clear();
-
-                        for (int col = 0; col < WorldX; col++)
-                        {
-                            line.Append(world[col, row] ? '@' : ' ');
-                        }
-
-                        writer.WriteLine(line);
-                    }
-
-                    writer.WriteLine();
+                    world[position.Y * WorldX + position.X] = true;
                 }
 
-                MoveRobots(ref i);
+                for (int row = 0; row < WorldY; row++)
+                {
+                    if (row == 31 && i == 6532)
+                    {
+                        System.Diagnostics.Debugger.Break();
+                    }
+
+                    ReadOnlySpan<bool> rowSpan = world.Slice(row * WorldX, WorldX);
+                    int idx = rowSpan.IndexOf(borderStart);
+
+                    if (idx >= 0)
+                    {
+                        int before = idx;
+                        idx++;
+                        int len = rowSpan.Slice(idx).IndexOf(false);
+                        int last = len - 1;
+
+                        int checkRow = row + 1;
+                        ReadOnlySpan<bool> checkSlice = world.Slice(checkRow * WorldX, WorldX);
+                        ReadOnlySpan<bool> leftCheck = checkSlice.Slice(before, 2);
+                        ReadOnlySpan<bool> rightCheck = checkSlice.Slice(idx + last, 2);
+
+                        while (leftCheck.SequenceEqual(FT) && rightCheck.SequenceEqual(TF))
+                        {
+                            if (checkSlice.Slice(idx, len).IndexOf(false) == -1)
+                            {
+                                PrintWorld(world, line);
+                                Console.WriteLine(i);
+                                return;
+                            }
+
+                            checkRow++;
+                            checkSlice = world.Slice(checkRow * WorldX, WorldX);
+                            leftCheck = checkSlice.Slice(before, 2);
+                            rightCheck = checkSlice.Slice(idx + last, 2);
+                        }
+                    }
+                }
+
+                MoveRobots(positions, velocities, ref i);
             }
 
-            void MoveRobots(ref int i)
+            static void MoveRobots(List<Point> positions, List<Point> velocities, ref int i)
             {
                 for (int robot = 0; robot < positions.Count; robot++)
                 {
@@ -173,6 +190,23 @@ namespace AdventOfCode2024
                 }
 
                 i++;
+            }
+        }
+
+        private static void PrintWorld(ReadOnlySpan<bool> world, StringBuilder builder)
+        {
+            builder.Clear();
+
+            for (int i = 0, col = 0; i < world.Length; i++, col++)
+            {
+                builder.Append(world[i] ? '@' : ' ');
+
+                if (col == WorldX - 1)
+                {
+                    Console.WriteLine(builder);
+                    builder.Clear();
+                    col = -1;
+                }
             }
         }
 
