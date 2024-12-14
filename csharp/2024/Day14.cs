@@ -137,11 +137,6 @@ namespace AdventOfCode2024
 
                 for (int row = 0; row < WorldY; row++)
                 {
-                    if (row == 31 && i == 6532)
-                    {
-                        System.Diagnostics.Debugger.Break();
-                    }
-
                     ReadOnlySpan<bool> rowSpan = world.Slice(row * WorldX, WorldX);
                     int idx = rowSpan.IndexOf(borderStart);
 
