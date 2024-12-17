@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using AdventOfCode.Util;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AdventOfCode2024
 {
