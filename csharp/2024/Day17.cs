@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using AdventOfCode.Util;
+using Microsoft.Win32;
 
 namespace AdventOfCode2024
 {
@@ -60,21 +61,7 @@ namespace AdventOfCode2024
         internal static void Problem1()
         {
             (long[] registers, List<int> program) = Load();
-
-            int ip = 0;
-
-            while (true)
-            {
-                int inc = Compute(ip, registers, program);
-
-                if (inc == int.MinValue)
-                {
-                    break;
-                }
-
-                ip += inc;
-            }
-
+            RunProgram(registers, program);
             Console.WriteLine();
         }
 
@@ -100,19 +87,7 @@ namespace AdventOfCode2024
                     originalRegisters.AsSpan().CopyTo(registers);
                     registers[0] = a;
 
-                    int ip = 0;
-
-                    while (true)
-                    {
-                        int inc = Compute(ip, registers, program, builder);
-
-                        if (inc == int.MinValue)
-                        {
-                            break;
-                        }
-
-                        ip += inc;
-                    }
+                    RunProgram(registers, program, builder);
 
                     string output = builder.ToString();
                     if (programStr.EndsWith(output))
@@ -130,6 +105,23 @@ namespace AdventOfCode2024
                         aValues.Enqueue(a);
                     }
                 }
+            }
+        }
+
+        private static void RunProgram(long[] registers, List<int> program, StringBuilder builder = default)
+        {
+            int ip = 0;
+
+            while (true)
+            {
+                int inc = Compute(ip, registers, program, builder);
+
+                if (inc == int.MinValue)
+                {
+                    break;
+                }
+
+                ip += inc;
             }
         }
 
