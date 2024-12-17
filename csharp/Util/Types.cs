@@ -412,6 +412,14 @@ namespace AdventOfCode.Util
 
             return clone;
         }
+
+        public IEnumerable<T[]> AllRows()
+        {
+            foreach (T[] arr in _data)
+            {
+                yield return arr;
+            }
+        }
     }
 
     public sealed class KeyedSets<T>
