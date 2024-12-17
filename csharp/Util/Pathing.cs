@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -25,7 +24,8 @@ namespace AdventOfCode.Util
             AStarEstimator<TWorld, TPosition, TCost> estimator,
             List<TPosition> pathToFill = null,
             Dictionary<TPosition, TCost> gScore = null,
-            Func<TPosition, TPosition, bool> customEquals = null)
+            Func<TPosition, TPosition, bool> customEquals = null,
+            bool allPaths = false)
             where TCost : INumber<TCost>, IMinMaxValue<TCost>
             where TPosition : IEquatable<TPosition>
         {
@@ -39,21 +39,31 @@ namespace AdventOfCode.Util
             openSet.Enqueue(start, TCost.Zero);
             fScore[start] = TCost.Zero;
 
-            while (openSet.Count > 0)
+            TCost bestCost = TCost.MaxValue;
+
+            while (openSet.TryDequeue(out TPosition current, out TCost dequeuedEstimate))
             {
-                TPosition current = openSet.Dequeue();
-
-                if (current.Equals(end))
+                if (allPaths)
                 {
-                    break;
-                }
-
-                if (customEquals is not null)
-                {
-                    if (customEquals(current, end))
+                    if (dequeuedEstimate > bestCost)
                     {
-                        end = current;
                         break;
+                    }
+                }
+                else
+                {
+                    if (current.Equals(end))
+                    {
+                        break;
+                    }
+
+                    if (customEquals is not null)
+                    {
+                        if (customEquals(current, end))
+                        {
+                            end = current;
+                            break;
+                        }
                     }
                 }
 
@@ -70,6 +80,32 @@ namespace AdventOfCode.Util
                     if (!exists || tentative < neighborBest)
                     {
                         neighborBest = tentative;
+
+                        if (allPaths)
+                        {
+                            // If there's a custom equality applied we have to
+                            // see if this end-state is the best end-state, so
+                            // have to compare tentative and bestCost again.
+                            //
+                            // If there's no custom equality then there's only
+                            // one end state, so it'd be redundant with the
+                            // tentative < neighborBest check above.
+                            if (customEquals is not null)
+                            {
+                                if (customEquals(neighbor, end))
+                                {
+                                    if (tentative < bestCost)
+                                    {
+                                        end = neighbor;
+                                        bestCost = tentative;
+                                    }
+                                }
+                            }
+                            else if (neighbor.Equals(end))
+                            {
+                                bestCost = tentative;
+                            }
+                        }
 
                         if (cameFrom is not null)
                         {
