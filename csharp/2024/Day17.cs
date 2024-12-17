@@ -148,7 +148,7 @@ namespace AdventOfCode2024
             {
                 case 0:
                     // adv
-                    registers[0] /= (int)double.Pow(2, ComboReg(arg, registers));
+                    registers[0] >>= (int)ComboReg(arg, registers);
                     break;
                 case 1:
                     // bxl
@@ -187,10 +187,11 @@ namespace AdventOfCode2024
                     break;
                 case 6:
                     // bdv
-                    registers[1] = registers[0] / (int)double.Pow(2, ComboReg(arg, registers));
+                    registers[1] = registers[0] >> (int)ComboReg(arg, registers);
                     break;
                 case 7:
-                    registers[2] = registers[0] / (int)double.Pow(2, ComboReg(arg, registers));
+                    // cdv
+                    registers[2] = registers[0] >> (int)ComboReg(arg, registers);
                     break;
                 default:
                     throw new InvalidDataException();
