@@ -96,7 +96,6 @@ namespace AdventOfCode2024
                 {
                     a = (a >> 3 << 3) | i;
                     builder.Clear();
-                    long saveA = a;
 
                     originalRegisters.AsSpan().CopyTo(registers);
                     registers[0] = a;
@@ -118,13 +117,13 @@ namespace AdventOfCode2024
                     string output = builder.ToString();
                     if (programStr.EndsWith(output))
                     {
-                        Console.WriteLine(saveA);
+                        Console.WriteLine(a);
 
                         Console.WriteLine(output);
 
                         if (programStr.Equals(output))
                         {
-                            Console.WriteLine($"Submit {saveA}");
+                            Console.WriteLine($"Submit {a}");
                             return;
                         }
 
