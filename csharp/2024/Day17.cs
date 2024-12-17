@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using AdventOfCode.Util;
-using Microsoft.Win32;
 
 namespace AdventOfCode2024
 {
@@ -69,14 +68,15 @@ namespace AdventOfCode2024
         {
             (long[] registers, List<int> program) = Load();
             long[] originalRegisters = registers.AsSpan().ToArray();
-            string programStr = string.Join(",", program.Select(i => i.ToString())) + ",";
 
             StringBuilder builder = new();
-            Queue<long> aValues = new();
-            aValues.Enqueue(0);
+            Queue<(int,long)> aValues = new();
+            aValues.Enqueue((program.Count - 1, 0));
 
-            while (aValues.TryDequeue(out long a))
+            while (aValues.TryDequeue(out var tuple))
             {
+                (int idx, long a) = tuple;
+                int target = program[idx];
                 a <<= 3;
 
                 for (int i = 0; i <= 7; i++)
@@ -87,49 +87,46 @@ namespace AdventOfCode2024
                     originalRegisters.AsSpan().CopyTo(registers);
                     registers[0] = a;
 
-                    RunProgram(registers, program, builder);
+                    int ret = RunProgram(registers, program, true);
 
-                    string output = builder.ToString();
-                    if (programStr.EndsWith(output))
+                    if (ret == target)
                     {
                         Console.WriteLine(a);
 
-                        Console.WriteLine(output);
-
-                        if (programStr.Equals(output))
+                        if (idx == 0)
                         {
                             Console.WriteLine($"Submit {a}");
                             return;
                         }
 
-                        aValues.Enqueue(a);
+                        aValues.Enqueue((idx - 1, a));
                     }
                 }
             }
         }
 
-        private static void RunProgram(long[] registers, List<int> program, StringBuilder builder = default)
+        private static int RunProgram(long[] registers, List<int> program, bool returnPrint = false)
         {
             int ip = 0;
+            int lastPrint = int.MinValue;
 
-            while (true)
+            while (Compute(ref ip, registers, program, ref lastPrint, returnPrint))
             {
-                int inc = Compute(ip, registers, program, builder);
-
-                if (inc == int.MinValue)
-                {
-                    break;
-                }
-
-                ip += inc;
             }
+
+            return lastPrint;
         }
 
-        private static int Compute(int ip, long[] registers, List<int> program, StringBuilder builder = default)
+        private static bool Compute(
+            ref int ip,
+            long[] registers,
+            List<int> program,
+            ref int lastPrint,
+            bool returnPrint)
         {
             if (ip > program.Count - 1)
             {
-                return int.MinValue;
+                return false;
             }
 
             int op = program[ip];
@@ -165,17 +162,14 @@ namespace AdventOfCode2024
                     break;
                 case 5:
                     // out
-                    string output = $"{ComboReg(arg, registers) & 7},";
+                    lastPrint = (int)(ComboReg(arg, registers) & 7);
 
-                    if (builder is not null)
+                    if (returnPrint)
                     {
-                        builder.Append(output);
-                    }
-                    else
-                    {
-                        Console.Write(output);
+                        return false;
                     }
 
+                    Console.Write($"{lastPrint},");
                     break;
                 case 6:
                     // bdv
@@ -189,7 +183,8 @@ namespace AdventOfCode2024
                     throw new InvalidDataException();
             }
 
-            return inc;
+            ip += inc;
+            return true;
 
             static long ComboReg(int arg, long[] registers)
             {
