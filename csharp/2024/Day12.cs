@@ -168,17 +168,17 @@ namespace AdventOfCode2024
                     if (region.Contains(p.GetNeighbor(looking)))
                     {
                         Utils.TraceForSample($"  Walking {walking} is blocked from {p}, turning right.");
-                        walking = TurnRight(walking);
+                        walking = walking.TurnRight();
                     }
                     else
                     {
                         Utils.TraceForSample($"  Walking {walking} passed a corner at {p}, turning left and advancing.");
-                        walking = TurnLeft(walking);
+                        walking = walking.TurnLeft();
                         p = p.GetNeighbor(walking);
                         advanced = true;
                     }
 
-                    looking = TurnLeft(walking);
+                    looking = walking.TurnLeft();
                 } while (p != start || !advanced);
 
                 Utils.TraceForSample(
@@ -205,28 +205,6 @@ namespace AdventOfCode2024
             }
 
             Console.WriteLine(ret);
-
-            static Directions2D TurnRight(Directions2D direction)
-            {
-                return direction switch
-                {
-                    Directions2D.North => Directions2D.East,
-                    Directions2D.East => Directions2D.South,
-                    Directions2D.South => Directions2D.West,
-                    Directions2D.West => Directions2D.North,
-                };
-            }
-
-            static Directions2D TurnLeft(Directions2D direction)
-            {
-                return direction switch
-                {
-                    Directions2D.North => Directions2D.West,
-                    Directions2D.East => Directions2D.North,
-                    Directions2D.South => Directions2D.East,
-                    Directions2D.West => Directions2D.South,
-                };
-            }
         }
     }
 }

@@ -48,7 +48,7 @@ namespace AdventOfCode2024
                     Facing = Facing,
                 }, 1);
 
-                Directions2D next = TurnLeft(Facing);
+                Directions2D next = Facing.TurnLeft();
 
                 if (turnWithoutMoving)
                 {
@@ -67,7 +67,7 @@ namespace AdventOfCode2024
                     }, 1001);
                 }
 
-                next = TurnRight(Facing);
+                next = Facing.TurnRight();
 
                 if (turnWithoutMoving)
                 {
@@ -86,35 +86,13 @@ namespace AdventOfCode2024
                     }, 1001);
                 }
             }
-
-            static Directions2D TurnRight(Directions2D direction)
-            {
-                return direction switch
-                {
-                    Directions2D.North => Directions2D.East,
-                    Directions2D.East => Directions2D.South,
-                    Directions2D.South => Directions2D.West,
-                    Directions2D.West => Directions2D.North,
-                };
-            }
-
-            static Directions2D TurnLeft(Directions2D direction)
-            {
-                return direction switch
-                {
-                    Directions2D.North => Directions2D.West,
-                    Directions2D.East => Directions2D.North,
-                    Directions2D.South => Directions2D.East,
-                    Directions2D.West => Directions2D.South,
-                };
-            }
-
+            
             public State FreeReverseDirection()
             {
                 return new State
                 {
                     Position = Position,
-                    Facing = TurnLeft(TurnLeft(Facing)),
+                    Facing = Facing.TurnLeft().TurnLeft(),
                 };
             }
 

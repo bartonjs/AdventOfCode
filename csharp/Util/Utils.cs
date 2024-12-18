@@ -378,5 +378,59 @@ namespace AdventOfCode.Util
 
             return modified;
         }
+
+        public static Directions2D CharToDirection(char c)
+        {
+            return c switch
+            {
+                '^' => Directions2D.North,
+                '>' => Directions2D.East,
+                '<' => Directions2D.West,
+                'v' => Directions2D.South,
+                _ => throw new ArgumentOutOfRangeException(nameof(c)),
+            };
+        }
+
+        public static char ToChar(this Directions2D direction)
+        {
+            return direction switch
+            {
+                Directions2D.North => '^',
+                Directions2D.East => '>',
+                Directions2D.South => 'v',
+                Directions2D.West => '<',
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(direction),
+                    "Direction value is unmapped"),
+            };
+        }
+
+        public static Directions2D TurnRight(this Directions2D direction)
+        {
+            return direction switch
+            {
+                Directions2D.North => Directions2D.East,
+                Directions2D.East => Directions2D.South,
+                Directions2D.South => Directions2D.West,
+                Directions2D.West => Directions2D.North,
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(direction),
+                    "Direction value is unmapped"),
+            };
+        }
+
+        public static Directions2D TurnLeft(this Directions2D direction)
+        {
+            return direction switch
+            {
+                Directions2D.North => Directions2D.West,
+                Directions2D.East => Directions2D.North,
+                Directions2D.South => Directions2D.East,
+                Directions2D.West => Directions2D.South,
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(direction),
+                    "Direction value is unmapped"),
+            };
+        }
     }
 }

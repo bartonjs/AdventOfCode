@@ -74,6 +74,18 @@ namespace AdventOfCode.Util
             return new Point(X + 1, Y);
         }
 
+        public Point GetNeighbor(char direction)
+        {
+            return direction switch
+            {
+                '^' => North(),
+                '>' => East(),
+                'v' => South(),
+                '<' => West(),
+                _ => throw new ArgumentException("Exactly one direction bit must be set", nameof(direction)),
+            };
+        }
+
         public Point GetNeighbor(Directions2D direction)
         {
             return direction switch

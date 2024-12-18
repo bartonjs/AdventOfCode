@@ -93,15 +93,7 @@ namespace AdventOfCode2024
 
             foreach (char move in moves)
             {
-                Directions2D direction = move switch
-                {
-                    '^' => Directions2D.North,
-                    '>' => Directions2D.East,
-                    '<' => Directions2D.West,
-                    'v' => Directions2D.South,
-                };
-
-                Point next = robotLoc.GetNeighbor(direction);
+                Point next = robotLoc.GetNeighbor(move);
 
                 if (world[next] == '.')
                 {
@@ -121,7 +113,7 @@ namespace AdventOfCode2024
 
                 while (world[free] == 'O')
                 {
-                    free = free.GetNeighbor(direction);
+                    free = free.GetNeighbor(move);
                 }
 
                 if (world[free] == '.')
@@ -152,14 +144,7 @@ namespace AdventOfCode2024
 
             foreach (char move in moves)
             {
-                Directions2D direction = move switch
-                {
-                    '^' => Directions2D.North,
-                    '>' => Directions2D.East,
-                    '<' => Directions2D.West,
-                    'v' => Directions2D.South,
-                };
-
+                Directions2D direction = Utils.CharToDirection(move);
                 Point next = robotLoc.GetNeighbor(direction);
 
                 if (world[next] == '.')
