@@ -8,43 +8,9 @@ namespace AdventOfCode2024
 {
     internal class Day16
     {
-        private static (DynamicPlane<char> world, Point start, Point end) Load()
+        private static (DynamicPlane<char> World, Point Start, Point End) Load()
         {
-            DynamicPlane<char> world = null;
-            Point start = default;
-            Point end = default;
-            int row = 0;
-
-            foreach (string s in Data.Enumerate())
-            {
-                char[] array = s.ToCharArray();
-
-                int sIdx = array.AsSpan().IndexOf('S');
-                int eIdx = array.AsSpan().IndexOf('E');
-
-                if (sIdx >= 0)
-                {
-                    start = new Point(sIdx, row);
-                }
-
-                if (eIdx >= 0)
-                {
-                    end = new Point(eIdx, row);
-                }
-
-                if (world is null)
-                {
-                    world = new DynamicPlane<char>(array);
-                }
-                else
-                {
-                    world.PushY(array);
-                }
-
-                row++;
-            }
-
-            return (world, start, end);
+            return Plane.LoadCharPlane(Data.Enumerate(), 'S', 'E');
         }
 
         private struct State : IEquatable<State>
@@ -59,25 +25,6 @@ namespace AdventOfCode2024
                     if (world.TryGetValue(state.Position, out char value) && value != '#')
                     {
                         yield return (state, cost);
-                    }
-                }
-            }
-
-            internal IEnumerable<(State, long)> Neighbors(DynamicPlane<char> world, List<State> forks)
-            {
-                int multi = 0;
-
-                foreach ((State state, long cost) in MaybeNeighbors())
-                {
-                    if (world.TryGetValue(state.Position, out char value) && value != '#')
-                    {
-                        if (multi == 1)
-                        {
-                            forks.Add(this);
-                        }
-
-                        yield return (state, cost);
-                        multi++;
                     }
                 }
             }

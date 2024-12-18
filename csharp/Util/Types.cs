@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -264,6 +265,101 @@ namespace AdventOfCode.Util
         public static bool operator !=(LongPoint3 a, LongPoint3 b) => !a.Equals(b);
     }
 
+    public sealed class Plane
+    {
+        public static (DynamicPlane<char> Plane, Point Point) LoadCharPlane(
+            IEnumerable<string> source,
+            char needle)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            Span<Point> locations = stackalloc Point[1];
+            DynamicPlane<char> ret = LoadCharPlaneCore(source, [needle], locations);
+            return (ret, locations[0]);
+        }
+
+        public static (DynamicPlane<char> Plane, Point Point1, Point Point2) LoadCharPlane(
+            IEnumerable<string> source,
+            char needle1,
+            char needle2)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            Span<Point> locations = stackalloc Point[2];
+            DynamicPlane<char> ret = LoadCharPlaneCore(source, [needle1, needle2], locations);
+            return (ret, locations[0], locations[1]);
+        }
+
+        public static DynamicPlane<char> LoadCharPlane(IEnumerable<string> source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            return LoadCharPlaneCore(source, default, default);
+        }
+
+        public static DynamicPlane<char> LoadCharPlane(
+            IEnumerable<string> source,
+            ReadOnlySpan<char> needles,
+            Span<Point> locations)
+        {
+            if (needles.Length != locations.Length)
+                throw new ArgumentException("Needles and lengths must have the same Length");
+
+            return LoadCharPlaneCore(
+                source,
+                needles,
+                locations);
+        }
+
+        private static DynamicPlane<char> LoadCharPlaneCore(
+            IEnumerable<string> source,
+            ReadOnlySpan<char> needles,
+            Span<Point> locations)
+        {
+            SearchValues<char> searchValues = SearchValues.Create(needles);
+            DynamicPlane<char> plane = null;
+            int row = 0;
+
+            foreach (string s in source)
+            {
+                char[] array = s.ToCharArray();
+                ReadOnlySpan<char> line = array;
+
+                int idx = line.IndexOfAny(searchValues);
+
+                while (idx >= 0)
+                {
+                    int needleIdx = needles.IndexOf(line[idx]);
+                    locations[needleIdx] = new Point(idx, row);
+
+                    int nextRelativeIdx = line.Slice(idx + 1).IndexOfAny(searchValues);
+
+                    if (nextRelativeIdx >= 0)
+                    {
+                        idx += nextRelativeIdx + 1;
+                    }
+                    else
+                    {
+                        idx = -1;
+                    }
+                }
+
+                if (plane is null)
+                {
+                    plane = new DynamicPlane<char>(array);
+                }
+                else
+                {
+                    plane.PushY(array);
+                }
+
+                row++;
+            }
+
+            return plane;
+        }
+    }
+
     public abstract class Plane<T>
     {
         public abstract ref T this[Point point] { get; }
@@ -282,7 +378,6 @@ namespace AdventOfCode.Util
             value = default;
             return false;
         }
-
     }
 
     public sealed class FixedPlane<T> : Plane<T>
