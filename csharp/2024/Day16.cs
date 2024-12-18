@@ -143,38 +143,15 @@ namespace AdventOfCode2024
 
         internal static void Problem2()
         {
-            (DynamicPlane<char> world, Point start, Point end) = Load();
+            (DynamicPlane<char> plane, Point start, Point end) = Load();
+            World world = new World(plane, start, end, false);
 
-            State initial = new State
-            {
-                Position = start,
-                Facing = Directions2D.East,
-            };
-
-            State final = new State
-            {
-                Position = end,
-                Facing = Point.AllDirections,
-            };
-
-            List<State> forks = new();
             List<State> path = new();
             HashSet<Point> allPoints = new HashSet<Point>();
             Dictionary<State, long> gScore = new();
-
             long minCost = 0;
 
-            long cost = Pathing.AStar(
-                (world, forks),
-                initial,
-                final,
-                static (position, world) => position.Neighbors(world.world),
-                static (candidate, position, world) => position.Position.ManhattanDistance(candidate.Position),
-                path,
-                gScore,
-                customEquals: (s1, s2) => s1.Position.Equals(s2.Position),
-                allPaths: true);
-
+            world.TryFindCoveringSpaces(world.InitialState, world.FinalState, gScore, out long cost, path);
             Console.WriteLine($"Best path had cost {cost} and length {path.Count}");
 
             Queue<State> queue = new Queue<State>();
@@ -192,7 +169,7 @@ namespace AdventOfCode2024
             {
                 long curCost = gScore[cur];
 
-                foreach ((State next, long increment) in cur.FreeReverseDirection().Neighbors(world))
+                foreach ((State next, long increment) in cur.FreeReverseDirection().Neighbors(plane))
                 {
                     State aboutFace = next.FreeReverseDirection();
 
@@ -210,9 +187,9 @@ namespace AdventOfCode2024
             HashSet<Point> exciting = new HashSet<Point>(allPoints);
             exciting.RemoveWhere(p => path.Any(s => s.Position == p));
 
-            PrintBestPaths(world, allPoints, exciting);
+            PrintBestPaths(plane, allPoints, exciting);
 
-            List<List<State>> allPaths = AllPaths(gScore, world, cost);
+            List<List<State>> allPaths = AllPaths(gScore, plane, cost);
 
             Console.WriteLine($"Found {allPaths.Count} different path(s).");
 
