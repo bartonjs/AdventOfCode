@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -343,5 +344,133 @@ namespace AdventOfCode.Util
             queue.Clear();
             queue.EnqueueRange(temp);
         }
+    }
+
+    public abstract class PointRoutableWorld : RoutableWorld<Point>
+    {
+        protected PointRoutableWorld(DynamicPlane<char> world) : base(world)
+        {
+        }
+
+        protected override long EstimateCost(Point candidate, Point end, DynamicPlane<char> world)
+        {
+            return candidate.ManhattanDistance(end);
+        }
+    }
+
+    public abstract class RoutableWorld<TPosition> where TPosition : IEquatable<TPosition>
+    {
+        private Func<TPosition, TPosition, bool> _customEquality;
+
+        public DynamicPlane<char> World { get; }
+
+        protected RoutableWorld(DynamicPlane<char> world)
+        {
+            World = world;
+        }
+
+        protected void SetCustomEquality(Func<TPosition, TPosition, bool> customEquality)
+        {
+            _customEquality = customEquality;
+        }
+
+        public long FindPathCost(TPosition start, TPosition end)
+        {
+            long localCost = Pathing.AStar(
+                World,
+                start,
+                end,
+                GetNeighbors,
+                EstimateCost,
+                customEquals: _customEquality);
+
+            if (localCost == long.MaxValue)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return localCost;
+        }
+
+        public bool TryFindPath(TPosition start, TPosition end, out long cost, out List<TPosition> path)
+        {
+            List<TPosition> localPath = new();
+
+            long localCost = Pathing.AStar(
+                World,
+                start,
+                end,
+                GetNeighbors,
+                EstimateCost,
+                localPath,
+                customEquals: _customEquality);
+
+            if (localCost == long.MaxValue)
+            {
+                cost = 0;
+                path = null;
+                return false;
+            }
+
+            cost = localCost;
+            path = localPath;
+            return true;
+        }
+
+        public bool TryFindPath(TPosition start, TPosition end, List<TPosition> path, out long cost)
+        {
+            long localCost = Pathing.AStar(
+                World,
+                start,
+                end,
+                GetNeighbors,
+                EstimateCost,
+                path,
+                customEquals: _customEquality);
+
+            if (localCost == long.MaxValue)
+            {
+                cost = 0;
+                return false;
+            }
+
+            cost = localCost;
+            return true;
+        }
+
+        public bool TryFindCoveringSpaces(
+            TPosition start,
+            TPosition end,
+            Dictionary<TPosition, long> gScore,
+            out long cost,
+            List<TPosition> path = null)
+        {
+            long localCost = Pathing.AStar(
+                World,
+                start,
+                end,
+                GetNeighbors,
+                EstimateCost,
+                path,
+                gScore,
+                _customEquality,
+                allPaths: true);
+
+            if (localCost == long.MaxValue)
+            {
+                cost = 0;
+                return false;
+            }
+
+            cost = localCost;
+            return true;
+        }
+
+        protected abstract long EstimateCost(TPosition candidate, TPosition end, DynamicPlane<char> world);
+
+        protected abstract IEnumerable<(TPosition Neighbor, long Cost)> GetNeighbors(
+            TPosition from,
+            DynamicPlane<char> world);
+
     }
 }

@@ -8,6 +8,38 @@ namespace AdventOfCode2024
 {
     internal class Day16
     {
+        private class World : RoutableWorld<State>
+        {
+            private readonly bool _combineTurnAndStep;
+            private readonly Point _start;
+            private readonly Point _end;
+
+            public World(DynamicPlane<char> world, Point start, Point end, bool combineTurnAndStep)
+                : base(world)
+            {
+                _combineTurnAndStep = combineTurnAndStep;
+                _start = start;
+                _end = end;
+
+                SetCustomEquality(static (a, b) => a.Position.Equals(b.Position));
+            }
+
+            internal State InitialState => new State { Position = _start, Facing = Directions2D.East };
+            internal State FinalState => new State { Position = _end, Facing = Point.AllDirections };
+
+            protected override long EstimateCost(State candidate, State end, DynamicPlane<char> world)
+            {
+                return candidate.Position.ManhattanDistance(end.Position);
+            }
+
+            protected override IEnumerable<(State Neighbor, long Cost)> GetNeighbors(State from, DynamicPlane<char> world)
+            {
+                return from.Neighbors(world, _combineTurnAndStep);
+            }
+
+            public long FindPathCost() => FindPathCost(InitialState, FinalState);
+        }
+
         private static (DynamicPlane<char> World, Point Start, Point End) Load()
         {
             return Plane.LoadCharPlane(Data.Enumerate(), 'S', 'E');
@@ -18,9 +50,9 @@ namespace AdventOfCode2024
             internal Point Position;
             internal Directions2D Facing;
 
-            internal IEnumerable<(State, long)> Neighbors(DynamicPlane<char> world, bool turnWithoutMoving)
+            internal IEnumerable<(State, long)> Neighbors(DynamicPlane<char> world, bool combineTurnAndStep = false)
             {
-                foreach ((State state, long cost) in MaybeNeighbors(turnWithoutMoving))
+                foreach ((State state, long cost) in MaybeNeighbors(combineTurnAndStep))
                 {
                     if (world.TryGetValue(state.Position, out char value) && value != '#')
                     {
@@ -29,18 +61,7 @@ namespace AdventOfCode2024
                 }
             }
 
-            internal IEnumerable<(State, long)> Neighbors(DynamicPlane<char> world)
-            {
-                foreach ((State state, long cost) in MaybeNeighbors())
-                {
-                    if (world.TryGetValue(state.Position, out char value) && value != '#')
-                    {
-                        yield return (state, cost);
-                    }
-                }
-            }
-
-            private IEnumerable<(State, long)> MaybeNeighbors(bool turnWithoutMoving = false)
+            private IEnumerable<(State, long)> MaybeNeighbors(bool combineTurnAndStep)
             {
                 yield return (new State
                 {
@@ -50,7 +71,7 @@ namespace AdventOfCode2024
 
                 Directions2D next = Facing.TurnLeft();
 
-                if (turnWithoutMoving)
+                if (!combineTurnAndStep)
                 {
                     yield return (new State
                     {
@@ -69,7 +90,7 @@ namespace AdventOfCode2024
 
                 next = Facing.TurnRight();
 
-                if (turnWithoutMoving)
+                if (!combineTurnAndStep)
                 {
                     yield return (new State
                     {
@@ -114,29 +135,10 @@ namespace AdventOfCode2024
 
         internal static void Problem1()
         {
-            (DynamicPlane<char> world, Point start, Point end) = Load();
+            (DynamicPlane<char> plane, Point start, Point end) = Load();
+            World world = new World(plane, start, end, true);
 
-            State initial = new State
-            {
-                Position = start,
-                Facing = Directions2D.East,
-            };
-
-            State final = new State
-            {
-                Position = end,
-                Facing = Point.AllDirections,
-            };
-
-            long cost = Pathing.AStar(
-                world,
-                initial,
-                final,
-                static (position, world) => position.Neighbors(world),
-                static (candidate, position, world) => position.Position.ManhattanDistance(candidate.Position),
-                customEquals: (s1, s2) => s1.Position.Equals(s2.Position));
-
-            Console.WriteLine(cost);
+            Console.WriteLine(world.FindPathCost(world.InitialState, world.FinalState));
         }
 
         internal static void Problem2()
@@ -166,7 +168,7 @@ namespace AdventOfCode2024
                 (world, forks),
                 initial,
                 final,
-                static (position, world) => position.Neighbors(world.world, true),
+                static (position, world) => position.Neighbors(world.world),
                 static (candidate, position, world) => position.Position.ManhattanDistance(candidate.Position),
                 path,
                 gScore,
@@ -272,7 +274,7 @@ namespace AdventOfCode2024
 
                         count = 0;
 
-                        foreach ((State next, long increment) in cur.FreeReverseDirection().Neighbors(world, true))
+                        foreach ((State next, long increment) in cur.FreeReverseDirection().Neighbors(world))
                         {
                             State aboutFace = next.FreeReverseDirection();
 
