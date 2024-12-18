@@ -9,8 +9,10 @@ namespace AdventOfCode2024
     {
 #if SAMPLE
         private const int WorldSize = 7;
+        private const int Part1Take = 12;
 #else
         private const int WorldSize = 71;
+        private const int Part1Take = 1024;
 #endif
 
         private static IEnumerable<Point> Load()
@@ -24,28 +26,17 @@ namespace AdventOfCode2024
 
         internal static void Problem1()
         {
-            Console.WriteLine(
-                Cost(
-                    Load(),
-#if SAMPLE
-                    12));
-#else
-                    1024));
-#endif
+            Console.WriteLine(Cost(Load(), Part1Take));
         }
 
         internal static void Problem2()
         {
             List<Point> allBlocks = new List<Point>(Load());
 
-#if SAMPLE
-            int low = 12;
-#else
-            int low = 1024;
-#endif
+            int low = Part1Take;
             int high = allBlocks.Count;
 
-            while (high > low)
+            while (high >= low)
             {
                 int mid = (high - low) / 2 + low;
                 int cost = Cost(allBlocks, mid);
@@ -53,32 +44,24 @@ namespace AdventOfCode2024
                 if (cost == int.MaxValue)
                 {
                     Utils.TraceForSample($"Failed at {mid}, reducing high");
-                    high = int.Max(low, mid - 1);
+                    high = mid - 1;
                 }
                 else
                 {
                     Utils.TraceForSample($"Succeeded at {mid}, raising low");
-                    low = int.Min(high, mid + 1);
+                    low = mid + 1;
                 }
             }
 
-            int target = low + 1;
+            Utils.TraceForSample($"L={low}, H={high}");
+            int minFail = low;
+            int index = minFail - 1;
 
-            while (Cost(allBlocks, target) == int.MaxValue)
-            {
-                target--;
-            }
+            Utils.TraceForSample($"Choosing point at {minFail} as lowest failure.");
+            Utils.TraceForSample($"Target: {Cost(allBlocks, minFail)}");
+            Utils.TraceForSample($"Target - 1: {Cost(allBlocks, index)}");
 
-            while (Cost(allBlocks, target) != int.MaxValue)
-            {
-                target++;
-            }
-
-            Utils.TraceForSample($"Choosing point at {target} as lowest failure.");
-            Utils.TraceForSample($"Target: {Cost(allBlocks, target)}");
-            Utils.TraceForSample($"Target - 1: {Cost(allBlocks, target-1)}");
-
-            Point whatFell = allBlocks[target - 1];
+            Point whatFell = allBlocks[index];
             Console.WriteLine($"{whatFell.X},{whatFell.Y}");
         }
 
