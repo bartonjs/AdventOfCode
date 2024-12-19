@@ -302,6 +302,9 @@ namespace AdventOfCode2024
             HashSet<Point> allPoints,
             HashSet<Point> excitingPoints)
         {
+            const ConsoleColor DefaultColor = ConsoleColor.DarkGray;
+            Console.ForegroundColor = DefaultColor;
+
             for (int row = 0; row < world.Height; row++)
             {
                 for (int col = 0; col < world.Width; col++)
@@ -312,13 +315,13 @@ namespace AdventOfCode2024
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Write('@');
-                        Console.ResetColor();
+                        Console.ForegroundColor = DefaultColor;
                     }
                     else if (allPoints.Contains(point))
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.Write('!');
-                        Console.ResetColor();
+                        Console.ForegroundColor = DefaultColor;
                     }
                     else
                     {
@@ -329,6 +332,7 @@ namespace AdventOfCode2024
                 Console.WriteLine();
             }
 
+            Console.ResetColor();
             Console.WriteLine();
         }
 
