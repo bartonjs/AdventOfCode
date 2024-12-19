@@ -199,7 +199,7 @@ namespace AdventOfCode2024
                 for (int i = 0; i < allPaths.Count; i++)
                 {
                     Console.WriteLine($"Path {i+1}:");
-                    PrintPath(world, allPaths[i]);
+                    PrintPath(plane, allPaths[i]);
                 }
             }
 #endif
