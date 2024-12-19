@@ -1,6 +1,7 @@
 ﻿using AdventOfCode.Util;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -97,6 +98,7 @@ namespace AdventOfCode
             typeof(Data).GetField("s_lines", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, lines);
         }
 
+        [RequiresUnreferencedCode("")]
         private static MethodInfo GetTarget(string[] args, out int day)
         {
             const BindingFlags Flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
