@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AdventOfCode.Util
@@ -431,6 +432,12 @@ namespace AdventOfCode.Util
                     nameof(direction),
                     "Direction value is unmapped"),
             };
+        }
+
+        internal static Span<T> AsFlatSpan<T>(this T[,] array)
+        {
+            ref T first = ref Unsafe.As<byte, T>(ref MemoryMarshal.GetArrayDataReference(array));
+            return MemoryMarshal.CreateSpan(ref first, array.Length);
         }
     }
 }

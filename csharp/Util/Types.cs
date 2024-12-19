@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -27,6 +28,12 @@ namespace AdventOfCode.Util
         {
             X = x;
             Y = y;
+        }
+
+        public static Point ParsePair(ReadOnlySpan<char> str)
+        {
+            int comma = str.IndexOf(',');
+            return new Point(int.Parse(str.Slice(0, comma)), int.Parse(str.Slice(comma + 1)));
         }
 
         public int ManhattanDistance(Point other)
@@ -394,29 +401,30 @@ namespace AdventOfCode.Util
 
     public sealed class FixedPlane<T> : Plane<T>
     {
-        private readonly int _width;
-        private readonly int _height;
         private readonly T[,] _data;
+
+        public int Width { get; }
+        public int Height { get; }
 
         public FixedPlane(int width, int height)
         {
             _data = new T[width, height];
-            _width = width;
-            _height = height;
+            Width = width;
+            Height = height;
         }
 
         public override ref T this[Point point] => ref _data[point.X, point.Y];
 
         public override bool ContainsPoint(Point point)
         {
-            return point.X >= 0 && point.X < _width && point.Y >= 0 && point.Y < _height;
+            return point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
         }
 
         public override IEnumerable<Point> AllPoints()
         {
-            for (int x = 0; x < _width; x++)
+            for (int x = 0; x < Width; x++)
             {
-                for (int y = 0; y < _height; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     yield return new Point(x, y);
                 }
@@ -425,9 +433,14 @@ namespace AdventOfCode.Util
 
         public override Plane<T> Clone()
         {
-            FixedPlane<T> clone = new FixedPlane<T>(_width, _height);
+            FixedPlane<T> clone = new FixedPlane<T>(Width, Height);
             Array.Copy(_data, clone._data, _data.Length);
             return clone;
+        }
+
+        public void Fill(T value)
+        {
+            _data.AsFlatSpan().Fill(value);
         }
     }
 
