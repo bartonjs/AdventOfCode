@@ -273,6 +273,46 @@ namespace AdventOfCode.Util
             return (false, default(TNode));
         }
 
+        public static Dictionary<TNode, TCost> DijkstraCosts<TWorld, TNode, TCost>(
+            TWorld world,
+            TNode from,
+            Func<TNode, TWorld, IEnumerable<(TNode, TCost)>> neighbors)
+            where TCost : INumber<TCost>, IMinMaxValue<TCost>
+        {
+            Dictionary<TNode, TCost> costs = new();
+            DijkstraCosts(world, from, neighbors, costs);
+            return costs;
+        }
+
+        public static void DijkstraCosts<TWorld, TNode, TCost>(
+            TWorld world,
+            TNode from,
+            Func<TNode, TWorld, IEnumerable<(TNode, TCost)>> neighbors,
+            Dictionary<TNode, TCost> costsToFill)
+            where TCost : INumber<TCost>, IMinMaxValue<TCost>
+        {
+            Queue<(TNode, TCost)> queue = new();
+            queue.Enqueue((from, TCost.Zero));
+
+            while (queue.TryDequeue(out var tuple))
+            {
+                (TNode nextNode, TCost nextCost) = tuple;
+
+                ref TCost nodeCost =
+                    ref CollectionsMarshal.GetValueRefOrAddDefault(costsToFill, nextNode, out bool exists);
+
+                if (!exists || nextCost < nodeCost)
+                {
+                    nodeCost = nextCost;
+
+                    foreach ((TNode Node, TCost Cost) neighbor in neighbors(nextNode, world))
+                    {
+                        queue.Enqueue((neighbor.Node, nextCost + neighbor.Cost));
+                    }
+                }
+            }
+        }
+
         public static TScore DepthFirstBest<TNode, TOther, TScore>(
             TNode start,
             TOther extraInfo,
