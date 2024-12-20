@@ -13,25 +13,67 @@ namespace AdventOfCode
         private const string Year = "2024";
         private static readonly Type TargetType = typeof(AdventOfCode2024.Day01);
 
+        private static bool s_perfRun;
+
+        private static string ParseArgs(string[] args)
+        {
+            string dayArg = null;
+
+            foreach (string arg in args)
+            {
+                switch (arg)
+                {
+                    case "-perf":
+                        s_perfRun = true;
+                        Console.Error.WriteLine("Executing repeatedly for 5 seconds...");
+                        break;
+                    case "-verbose":
+                        Print.EnableVerbose();
+                        break;
+                    default:
+                        if (dayArg is not null)
+                        {
+                            Console.Error.WriteLine("Enter the day number, optionally with a -1 for part 1 (e.g. 14-1)");
+                            throw new InvalidDataException();
+                        }
+
+                        dayArg = arg;
+                        break;
+                }
+            }
+
+            return dayArg;
+        }
+
         private static async Task Main(string[] args)
         {
             MethodInfo method;
+            string dayArg;
             int day;
 
             try
             {
-                method = GetTarget(args, out day);
+                dayArg = ParseArgs(args);
+            }
+            catch (InvalidDataException)
+            {
+                return;
+            }
+
+            try
+            {
+                method = GetTarget(dayArg, out day);
 
                 if (method == null)
                 {
-                    Console.WriteLine($"No runnable problem found on day {day}.");
+                    Console.Error.WriteLine($"No runnable problem found on day {day}.");
                     return;
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error determining what part to run.");
-                Console.WriteLine(e);
+                Console.Error.WriteLine("Error determining what part to run.");
+                Console.Error.WriteLine(e);
                 return;
             }
 
@@ -42,36 +84,49 @@ namespace AdventOfCode
             catch (Exception e)
             {
 #if SAMPLE
-                Console.WriteLine($"Error loading sample data for day {day}.");
+                Console.Error.WriteLine($"Error loading sample data for day {day}.");
 #else
-                Console.WriteLine($"Error loading data for day {day}.");
+                Console.Error.WriteLine($"Error loading data for day {day}.");
 #endif
-                Console.WriteLine(e);
+                Console.Error.WriteLine(e);
                 return;
             }
 
-            Stopwatch sw = Stopwatch.StartNew();
+            TimeSpan allowed = s_perfRun ? TimeSpan.FromSeconds(5) : TimeSpan.Zero;
+            int runCount = 0;
+            Stopwatch sw = new Stopwatch();
 
-            try
+            do
             {
-                object resp = method.Invoke(null, null);
-
-                if (resp is Task t)
+                try
                 {
-                    await t.ConfigureAwait(false);
-                }
-            }
-            catch (TargetInvocationException tie)
-            {
-                Console.WriteLine(tie.InnerException);
-            }
+                    runCount++;
+                    sw.Start();
+                    object resp = method.Invoke(null, null);
 
-            sw.Stop();
+                    if (resp is Task t)
+                    {
+                        await t.ConfigureAwait(false);
+                    }
+
+                    sw.Stop();
+                }
+                catch (TargetInvocationException tie)
+                {
+                    sw.Stop();
+                    Console.WriteLine(tie.InnerException);
+                }
+            } while (sw.Elapsed < allowed);
 
 #if SAMPLE
             Console.WriteLine("**SAMPLE ANSWER**");
 #endif
-            Console.WriteLine($"Executed in {sw.Elapsed.TotalMilliseconds}ms.");
+            Console.Error.WriteLine($"Executed in {sw.Elapsed.TotalMilliseconds}ms.");
+
+            if (s_perfRun)
+            {
+                Console.Error.WriteLine($"Ran {runCount} iterations, {sw.Elapsed.TotalMilliseconds / runCount:F4}ms each.");
+            }
         }
 
         private static void LoadData(int day)
@@ -99,29 +154,24 @@ namespace AdventOfCode
         }
 
         [RequiresUnreferencedCode("")]
-        private static MethodInfo GetTarget(string[] args, out int day)
+        private static MethodInfo GetTarget(string dayArg, out int day)
         {
             const BindingFlags Flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
             string rootNS = TargetType.Namespace;
 
-            if (args?.Length > 0)
+            if (dayArg is not null)
             {
-                if (args.Length != 1)
-                {
-                    Console.WriteLine("Enter the day number, optionally with a -1 for part 1 (e.g. 14-1)");
-                }
-
-                int hyphen = args[0].IndexOf('-');
+                int hyphen = dayArg.IndexOf('-');
                 int? part = null;
 
                 if (hyphen >= 0)
                 {
-                    day = int.Parse(args[0].AsSpan(0, hyphen));
-                    part = int.Parse(args[0].AsSpan(hyphen + 1));
+                    day = int.Parse(dayArg.AsSpan(0, hyphen));
+                    part = int.Parse(dayArg.AsSpan(hyphen + 1));
                 }
                 else
                 {
-                    day = int.Parse(args[0]);
+                    day = int.Parse(dayArg);
                 }
 
                 Type t = TargetType.Assembly.GetType($"{rootNS}.Day{day:D2}", true);

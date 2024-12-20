@@ -43,7 +43,7 @@ namespace AdventOfCode2024
             CostPlane backwardCosts = new CostPlane(world.Width, world.Height);
             Pathing.DijkstraCosts(world, end, Neighbors, backwardCosts);
 
-            Console.WriteLine($"Normal cost is {backwardCosts[start]}");
+            Print.Verbose($"Normal cost is {backwardCosts[start]}");
             long ret = 0;
 
 #if SAMPLE
