@@ -105,6 +105,14 @@ namespace AdventOfCode.Util
             };
         }
 
+        public IEnumerable<Point> GetCardinalNeighbors()
+        {
+            yield return North();
+            yield return East();
+            yield return South();
+            yield return West();
+        }
+
         public IEnumerable<Point> GetNeighbors(Directions2D directions)
         {
             if ((directions & ~AllDirections) != 0)

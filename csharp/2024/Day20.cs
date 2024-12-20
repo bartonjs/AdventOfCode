@@ -29,10 +29,16 @@ namespace AdventOfCode2024
 
             (DynamicPlane<char> world, Point start, Point end) = Load();
 
-            static IEnumerable<(Point, int)> Neighbors(Point from, DynamicPlane<char> world) =>
-                from.GetNeighbors(Point.AllDirections)
-                    .Where(p => world.TryGetValue(p, out char value) && value != '#')
-                    .Select(p => (p, 1));
+            static IEnumerable<(Point, int)> Neighbors(Point from, DynamicPlane<char> world)
+            {
+                foreach (Point neighbor in from.GetCardinalNeighbors())
+                {
+                    if (world.TryGetValue(neighbor, out char value) && value != '#')
+                    {
+                        yield return (neighbor, 1);
+                    }
+                }
+            }
 
             CostPlane backwardCosts = new CostPlane(world.Width, world.Height);
             Pathing.DijkstraCosts(world, end, Neighbors, backwardCosts);
@@ -86,10 +92,10 @@ namespace AdventOfCode2024
                         int delta = entranceCost - alternateCost;
 
 #if SAMPLE
-                    if (delta >= sampleThreshold)
-                    {
-                        savingsCounts.Increment(delta);
-                    }
+                        if (delta >= sampleThreshold)
+                        {
+                            savingsCounts.Increment(delta);
+                        }
 #endif
 
                         if (delta >= InclusionThreshold)
