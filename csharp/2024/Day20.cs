@@ -24,6 +24,8 @@ namespace AdventOfCode2024
 
         private static long Run(int maxWormholeLength, int sampleThreshold)
         {
+            const int InclusionThreshold = 100;
+
             (DynamicPlane<char> world, Point start, Point end) = Load();
 
             static IEnumerable<(Point, int)> Neighbors(Point from, DynamicPlane<char> world) =>
@@ -31,9 +33,8 @@ namespace AdventOfCode2024
                     .Where(p => world.TryGetValue(p, out char value) && value != '#')
                     .Select(p => (p, 1));
 
-            Dictionary<Point, int> forwardCosts = Pathing.DijkstraCosts(world, start, Neighbors);
             Dictionary<Point, int> backwardCosts = Pathing.DijkstraCosts(world, end, Neighbors);
-            int normalCost = forwardCosts[end];
+            int normalCost = backwardCosts[start];
 
             Console.WriteLine($"Normal cost is {normalCost}");
             long ret = 0;
@@ -44,7 +45,18 @@ namespace AdventOfCode2024
 
             foreach (Point cheatStart in world.AllPoints())
             {
-                if (!forwardCosts.TryGetValue(cheatStart, out int forwardCost))
+                if (!backwardCosts.TryGetValue(cheatStart, out int entranceCost))
+                {
+                    continue;
+                }
+
+                // If it costs less than 100 to get from the candidate wormhole entrance
+                // to the end, then we can't save 100 or more by taking the wormhole.
+                if (entranceCost < InclusionThreshold
+#if SAMPLE
+                    && entranceCost < sampleThreshold
+#endif
+                   )
                 {
                     continue;
                 }
@@ -58,13 +70,13 @@ namespace AdventOfCode2024
                         continue;
                     }
 
-                    if (!backwardCosts.TryGetValue(cheatEnd, out int backwardCost))
+                    if (!backwardCosts.TryGetValue(cheatEnd, out int exitCost))
                     {
                         continue;
                     }
 
-                    int totalCost = forwardCost + wormholeDistance + backwardCost;
-                    int delta = normalCost - totalCost;
+                    int alternateCost = wormholeDistance + exitCost;
+                    int delta = entranceCost - alternateCost;
 
 #if SAMPLE
                     if (delta >= sampleThreshold)
@@ -73,7 +85,7 @@ namespace AdventOfCode2024
                     }
 #endif
 
-                    if (delta >= 100)
+                    if (delta >= InclusionThreshold)
                     {
                         ret++;
                     }
