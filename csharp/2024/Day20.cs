@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AdventOfCode.Util;
@@ -33,10 +34,10 @@ namespace AdventOfCode2024
                     .Where(p => world.TryGetValue(p, out char value) && value != '#')
                     .Select(p => (p, 1));
 
-            Dictionary<Point, int> backwardCosts = Pathing.DijkstraCosts(world, end, Neighbors);
-            int normalCost = backwardCosts[start];
+            CostPlane backwardCosts = new CostPlane(world.Width, world.Height);
+            Pathing.DijkstraCosts(world, end, Neighbors, backwardCosts);
 
-            Console.WriteLine($"Normal cost is {normalCost}");
+            Console.WriteLine($"Normal cost is {backwardCosts[start]}");
             long ret = 0;
 
 #if SAMPLE
@@ -61,22 +62,28 @@ namespace AdventOfCode2024
                     continue;
                 }
 
-                foreach (Point cheatEnd in world.AllPoints())
+                int xMin = cheatStart.X - maxWormholeLength;
+                int yMin = cheatStart.Y - maxWormholeLength;
+
+                for (int x = cheatStart.X + maxWormholeLength; x >= xMin; x--)
                 {
-                    int wormholeDistance = cheatStart.ManhattanDistance(cheatEnd);
-
-                    if (wormholeDistance > maxWormholeLength)
+                    for (int y = cheatStart.Y + maxWormholeLength; y >= yMin; y--)
                     {
-                        continue;
-                    }
+                        Point cheatEnd = new Point(x, y);
+                        int wormholeDistance = cheatStart.ManhattanDistance(cheatEnd);
 
-                    if (!backwardCosts.TryGetValue(cheatEnd, out int exitCost))
-                    {
-                        continue;
-                    }
+                        if (wormholeDistance > maxWormholeLength)
+                        {
+                            continue;
+                        }
 
-                    int alternateCost = wormholeDistance + exitCost;
-                    int delta = entranceCost - alternateCost;
+                        if (!backwardCosts.TryGetValue(cheatEnd, out int exitCost))
+                        {
+                            continue;
+                        }
+
+                        int alternateCost = wormholeDistance + exitCost;
+                        int delta = entranceCost - alternateCost;
 
 #if SAMPLE
                     if (delta >= sampleThreshold)
@@ -85,9 +92,10 @@ namespace AdventOfCode2024
                     }
 #endif
 
-                    if (delta >= InclusionThreshold)
-                    {
-                        ret++;
+                        if (delta >= InclusionThreshold)
+                        {
+                            ret++;
+                        }
                     }
                 }
             }
@@ -190,6 +198,95 @@ namespace AdventOfCode2024
 #endif
 
             Console.WriteLine(ret);
+        }
+
+        private sealed class CostPlane : IDictionary<Point, int>
+        {
+            private readonly FixedPlane<int> _plane;
+
+            internal CostPlane(int width, int height)
+            {
+                _plane = new FixedPlane<int>(width, height);
+                _plane.Fill(int.MaxValue);
+            }
+
+            IEnumerator<KeyValuePair<Point, int>> IEnumerable<KeyValuePair<Point, int>>.GetEnumerator()
+            {
+                throw new NotSupportedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotSupportedException();
+            }
+
+            void ICollection<KeyValuePair<Point, int>>.Add(KeyValuePair<Point, int> item)
+            {
+                throw new NotSupportedException();
+            }
+
+            void ICollection<KeyValuePair<Point, int>>.Clear()
+            {
+                throw new NotSupportedException();
+            }
+
+            bool ICollection<KeyValuePair<Point, int>>.Contains(KeyValuePair<Point, int> item)
+            {
+                throw new NotSupportedException();
+            }
+
+            void ICollection<KeyValuePair<Point, int>>.CopyTo(KeyValuePair<Point, int>[] array, int arrayIndex)
+            {
+                throw new NotSupportedException();
+            }
+
+            bool ICollection<KeyValuePair<Point, int>>.Remove(KeyValuePair<Point, int> item)
+            {
+                throw new NotSupportedException();
+            }
+
+            int ICollection<KeyValuePair<Point, int>>.Count => throw new NotSupportedException();
+
+            bool ICollection<KeyValuePair<Point, int>>.IsReadOnly => false;
+
+            void IDictionary<Point, int>.Add(Point key, int value)
+            {
+                throw new NotSupportedException();
+            }
+
+            bool IDictionary<Point, int>.ContainsKey(Point key)
+            {
+                throw new NotSupportedException();
+            }
+
+            bool IDictionary<Point, int>.Remove(Point key)
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool TryGetValue(Point key, out int value)
+            {
+                if (!_plane.TryGetValue(key, out int val) || val == int.MaxValue)
+                {
+                    value = 0;
+                    return false;
+                }
+
+                value = val;
+                return true;
+            }
+
+            public ref int this[Point key] => ref _plane[key];
+
+            int IDictionary<Point, int>.this[Point key]
+            {
+                get => _plane[key];
+                set => _plane[key] = value;
+            }
+
+            ICollection<Point> IDictionary<Point, int>.Keys => throw new NotSupportedException();
+
+            ICollection<int> IDictionary<Point, int>.Values => throw new NotSupportedException();
         }
     }
 }

@@ -288,6 +288,32 @@ namespace AdventOfCode.Util
             TWorld world,
             TNode from,
             Func<TNode, TWorld, IEnumerable<(TNode, TCost)>> neighbors,
+            IDictionary<TNode, TCost> costsToFill)
+            where TCost : INumber<TCost>, IMinMaxValue<TCost>
+        {
+            Queue<(TNode, TCost)> queue = new();
+            queue.Enqueue((from, TCost.Zero));
+
+            while (queue.TryDequeue(out var tuple))
+            {
+                (TNode nextNode, TCost nextCost) = tuple;
+
+                if (!costsToFill.TryGetValue(nextNode, out TCost nodeCost) || nextCost < nodeCost)
+                {
+                    costsToFill[nextNode] = nextCost;
+
+                    foreach ((TNode Node, TCost Cost) neighbor in neighbors(nextNode, world))
+                    {
+                        queue.Enqueue((neighbor.Node, nextCost + neighbor.Cost));
+                    }
+                }
+            }
+        }
+
+        public static void DijkstraCosts<TWorld, TNode, TCost>(
+            TWorld world,
+            TNode from,
+            Func<TNode, TWorld, IEnumerable<(TNode, TCost)>> neighbors,
             Dictionary<TNode, TCost> costsToFill)
             where TCost : INumber<TCost>, IMinMaxValue<TCost>
         {
