@@ -422,6 +422,7 @@ namespace AdventOfCode.Util
         }
 
         public override ref T this[Point point] => ref _data[point.X, point.Y];
+        public ref T this[int x, int y] => ref _data[x, y];
 
         public override bool ContainsPoint(Point point)
         {
