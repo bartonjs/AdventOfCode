@@ -45,7 +45,7 @@ namespace AdventOfCode2024
             Dictionary<int, long> bananas = new();
             Dictionary<int, long> theseBananas = new();
 
-            int testKey = 0;
+            //int testKey = 0;
             
             // bigger sample
             //testKey |= (-2 & 0xFF);
@@ -65,7 +65,7 @@ namespace AdventOfCode2024
             //testKey <<= 8;
             //testKey |= (2 & 0xFF);
 
-            testKey = 0x0200FF02;
+            //testKey = 0x0200FF02;
 
             foreach (string s in Data.Enumerate())
             {
@@ -83,14 +83,14 @@ namespace AdventOfCode2024
                     pos |= (delta & 0xFF);
                     //Print.ForSample($"pos={pos:X8}, part={part}, delta={delta}, next={next}");
                     
-                    if (i > 4)
+                    if (i > 3)
                     {
                         if (theseBananas.TryAdd(pos, part))
                         {
-                            if (pos == testKey)
-                            {
-                                Console.WriteLine(part);
-                            }
+                            //if (pos == testKey)
+                            //{
+                            //    Console.WriteLine(part);
+                            //}
                         }
                     }
 
@@ -106,72 +106,6 @@ namespace AdventOfCode2024
 
             var finalKvp = bananas.MaxBy(item => item.Value);
             Console.WriteLine($"{finalKvp.Key:X8} => {finalKvp.Value}");
-        }
-
-        internal static void Problem2b()
-        {
-            List<List<int>> allDeltas = new();
-            List<List<int>> allValues = new();
-
-            foreach (string s in Data.Enumerate())
-            {
-                long value = long.Parse(s);
-                bool first = true;
-                int last = 0;
-                List<int> deltas = new(2000);
-                allDeltas.Add(deltas);
-                List<int> values = new(2000);
-                allValues.Add(values);
-
-                for (int i = 0; i < 2000; i++)
-                {
-                    long next = NextVal(value);
-                    int part = (int)(next % 10);
-
-                    if (!first)
-                    {
-                        int delta = part - last;
-                        deltas.Add(delta);
-                        values.Add(part);
-                    }
-
-                    last = part;
-                    first = false;
-                }
-            }
-
-            //Dictionary<(int, int, int, int), int> bananas = new();
-            int maxBananas = int.MinValue;
-
-            for (int a = -9; a < 10; a++)
-            {
-                for (int b = -9; b < 10; b++)
-                {
-                    for (int c = -9; c < 10; c++)
-                    {
-                        for (int d = -9; d < 10; d++)
-                        {
-                            ReadOnlySpan<int> needle = [a, b, c, d];
-                            int theseBananas = 0;
-
-                            for (int i = 0; i < allDeltas.Count; i++)
-                            {
-                                ReadOnlySpan<int> deltas = CollectionsMarshal.AsSpan(allDeltas[i]);
-                                int idx = deltas.IndexOf(needle);
-
-                                if (idx >= 0)
-                                {
-                                    theseBananas += allValues[i][idx + 4];
-                                }
-                            }
-
-                            maxBananas = int.Max(maxBananas, theseBananas);
-                        }
-                    }
-                }
-            }
-
-            Console.WriteLine(maxBananas);
         }
 
         private static long NextVal(long initialVal)
