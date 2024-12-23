@@ -576,5 +576,11 @@ namespace AdventOfCode.Util
 
             return false;
         }
+
+        public HashSet<T> this[T key] => _data[key];
+
+        public IEnumerable<T> Keys => _data.Keys;
+
+        public Dictionary<T, HashSet<T>>.Enumerator GetEnumerator() => _data.GetEnumerator();
     }
 }
