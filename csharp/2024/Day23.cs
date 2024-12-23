@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AdventOfCode.Util;
 
@@ -73,14 +74,123 @@ namespace AdventOfCode2024
                 allNodes.Add(right);
             }
 
-            HashSet<string> work = new();
+            Stopwatch sw = Stopwatch.StartNew();
             List<HashSet<string>> allGraphs = MakeGraphs(map);
+            sw.Stop();
             HashSet<string> max = allGraphs.MaxBy(g => g.Count);
 
             string str = string.Join(',', max.OrderBy(t => t));
             Console.WriteLine(str);
+            //Console.WriteLine(str == "cm,de,ez,gv,hg,iy,or,pw,qu,rs,sn,uc,wq");
+
+#if STATS
+            Stats(allGraphs, sw, "Rando");
+
+            List<HashSet<string>> bk = new();
+            sw.Restart();
+            BronKerbosch(new HashSet<string>(), new HashSet<string>(map.Keys), new HashSet<string>(), bk, map);
+            sw.Stop();
+
+            Stats(bk, sw, "Bron-Kerbosch");
+
+            List<HashSet<string>> bkp = new();
+            sw.Restart();
+            BronKerboschWithPivot(new HashSet<string>(), new HashSet<string>(map.Keys), new HashSet<string>(), bkp, map);
+            sw.Stop();
+
+            Stats(bk, sw, "Bron-Kerbosch with Pivot");
+
+            static void Stats(IEnumerable<HashSet<string>> graphs, Stopwatch sw, string label)
+            {
+                Dictionary<int, int> counts = new();
+                Console.WriteLine($"BEGIN {label}:");
+                HashSet<string> distinct = new();
+
+                foreach (HashSet<string> graph in graphs)
+                {
+                    if (distinct.Add(string.Join(',', graph.OrderBy(t => t))))
+                    {
+                        counts.Increment(graph.Count);
+                    }
+                }
+
+                foreach (var kvp in counts.OrderBy(kvp => kvp.Key))
+                {
+                    Console.WriteLine($"Length {kvp.Key}: {kvp.Value}");
+                }
+
+                Console.WriteLine($"Runtime: {sw.Elapsed.TotalMilliseconds:F4}ms");
+                Console.WriteLine();
+            }
+#endif
         }
 
+        private static void BronKerbosch(
+            HashSet<string> r,
+            HashSet<string> p,
+            HashSet<string> x,
+            List<HashSet<string>> accum,
+            KeyedSets<string> map)
+        {
+            if (p.Count == 0 && x.Count == 0)
+            {
+                accum.Add(new HashSet<string>(r));
+                return;
+            }
+
+            foreach (string vertex in p)
+            {
+                r.Add(vertex);
+                HashSet<string> pIntersectNv = new HashSet<string>(map[vertex]);
+                pIntersectNv.IntersectWith(p);
+                HashSet<string> xIntersectNv = new HashSet<string>(map[vertex]);
+                xIntersectNv.IntersectWith(x);
+
+                BronKerbosch(r, pIntersectNv, xIntersectNv, accum, map);
+                r.Remove(vertex);
+                p.Remove(vertex);
+                x.Add(vertex);
+            }
+        }
+
+        private static void BronKerboschWithPivot(
+            HashSet<string> r,
+            HashSet<string> p,
+            HashSet<string> x,
+            List<HashSet<string>> accum,
+            KeyedSets<string> map)
+        {
+            if (p.Count == 0 && x.Count == 0)
+            {
+                accum.Add(new HashSet<string>(r));
+                return;
+            }
+
+            string u = p.Count > 0 ? p.First() : x.First();
+            HashSet<string> nOfU = map[u];
+
+            foreach (string vertex in p)
+            {
+                if (nOfU.Contains(vertex))
+                {
+                    continue;
+                }
+
+                r.Add(vertex);
+                HashSet<string> pIntersectNv = new HashSet<string>(map[vertex]);
+                pIntersectNv.IntersectWith(p);
+                HashSet<string> xIntersectNv = new HashSet<string>(map[vertex]);
+                xIntersectNv.IntersectWith(x);
+
+                BronKerbosch(r, pIntersectNv, xIntersectNv, accum, map);
+                r.Remove(vertex);
+                p.Remove(vertex);
+                x.Add(vertex);
+            }
+        }
+
+        // This algorithm is fast, but seems to rely a lot on luck.
+        // For a true answer, see BronKerbosch (with or without pivot)
         private static List<HashSet<string>> MakeGraphs(
             KeyedSets<string> map)
         {
@@ -88,32 +198,29 @@ namespace AdventOfCode2024
 
             foreach (string key in map.Keys)
             {
-                HashSet<string> newClique = [key];
+                HashSet<string> newClique = [];
                 HashSet<string> processed = new();
                 Queue<string> queue = new();
                 queue.Enqueue(key);
 
-                while (queue.Count > 0)
+                while (queue.TryDequeue(out string node))
                 {
-                    string node = queue.Dequeue();
-                    HashSet<string> helper = new HashSet<string>(newClique);
-                    helper.Remove(node);
-
+                    HashSet<string> nodeTargets = map[node];
+                    
                     if (processed.Add(node))
                     {
-                        int before = helper.Count;
-                        HashSet<string> nodeTargets = map[node];
-                        helper.IntersectWith(nodeTargets);
-
-                        if (helper.Count >= before)
+                        if (nodeTargets.Count >= newClique.Count - 1)
                         {
-                            newClique.Add(node);
-
-                            foreach (string next in nodeTargets)
+                            if (nodeTargets.IsSupersetOf(newClique))
                             {
-                                if (!processed.Contains(next))
+                                newClique.Add(node);
+
+                                foreach (string next in nodeTargets.OrderByDescending(a => map[a].Count))
                                 {
-                                    queue.Enqueue(next);
+                                    if (!processed.Contains(next))
+                                    {
+                                        queue.Enqueue(next);
+                                    }
                                 }
                             }
                         }
