@@ -5,6 +5,8 @@ namespace AdventOfCode2025
 {
     public class Day02
     {
+        private static readonly long[] s_pow10 = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000];
+
         public static void Problem1()
         {
             long ret = 0;
@@ -52,7 +54,7 @@ namespace AdventOfCode2025
                             continue;
                         }
 
-                        long halfPow = (long)Math.Pow(10, digits / 2);
+                        long halfPow = s_pow10[digits / 2];
                         (long quot, long rem) = Math.DivRem(i, halfPow);
 
                         if (quot == rem)
@@ -130,7 +132,7 @@ namespace AdventOfCode2025
 
             static bool IsInvalid(long value, int digits)
             {
-                long mod = (long)Math.Pow(10, digits);
+                long mod = s_pow10[digits];
                 long candidate = value % mod;
 
                 if (candidate == 0)
