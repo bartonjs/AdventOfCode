@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AdventOfCode.Util;
 
 namespace AdventOfCode2025
@@ -22,10 +23,8 @@ namespace AdventOfCode2025
             }
         }
 
-        public static void Problem1()
+        private static IEnumerable<(long Low, long High)> ParseInput()
         {
-            long ret = 0;
-
             foreach (string s in Data.Enumerate())
             {
                 int comma = -1;
@@ -47,30 +46,38 @@ namespace AdventOfCode2025
                         nextComma = s.Length;
                     }
 
-                    long first = long.Parse(s.AsSpan(start, hyphen - start));
-                    long second = long.Parse(s.AsSpan(hyphen + 1, nextComma - (hyphen + 1)));
+                    long low = long.Parse(s.AsSpan(start, hyphen - start));
+                    long high = long.Parse(s.AsSpan(hyphen + 1, nextComma - (hyphen + 1)));
                     comma = nextComma;
 
-                    first = long.Max(11, first);
+                    yield return (low, high);
+                }
+            }
+        }
 
-                    for (long i = first; i <= second; i++)
+        public static void Problem1()
+        {
+            long ret = 0;
+
+            foreach ((long low, long high) in ParseInput())
+            {
+                for (long i = long.Max(11, low); i <= high; i++)
+                {
+                    int digits = CountDigits(i);
+
+                    if (digits % 2 != 0)
                     {
-                        int digits = CountDigits(i);
+                        i = s_pow10[digits] - 1;
+                        continue;
+                    }
 
-                        if (digits % 2 != 0)
-                        {
-                            i = s_pow10[digits] - 1;
-                            continue;
-                        }
+                    long halfPow = s_pow10[digits / 2];
+                    (long quot, long rem) = Math.DivRem(i, halfPow);
 
-                        long halfPow = s_pow10[digits / 2];
-                        (long quot, long rem) = Math.DivRem(i, halfPow);
-
-                        if (quot == rem)
-                        {
-                            Utils.TraceForSample(i.ToString());
-                            ret += i;
-                        }
+                    if (quot == rem)
+                    {
+                        Utils.TraceForSample(i.ToString());
+                        ret += i;
                     }
                 }
             }
@@ -82,50 +89,24 @@ namespace AdventOfCode2025
         {
             long ret = 0;
 
-            foreach (string s in Data.Enumerate())
+            foreach ((long low, long high) in ParseInput())
             {
-                int comma = -1;
-
-                while (comma < s.Length)
+                for (long i = long.Max(11, low); i <= high; i++)
                 {
-                    int start = comma + 1;
-                    int hyphen = s.IndexOf('-', start);
+                    int digits = CountDigits(i);
 
-                    if (hyphen < 0)
+                    for (int probe = digits / 2; probe > 0; probe--)
                     {
-                        break;
-                    }
-
-                    int nextComma = s.IndexOf(',', hyphen);
-
-                    if (nextComma < 0)
-                    {
-                        nextComma = s.Length;
-                    }
-
-                    long first = long.Parse(s.AsSpan(start, hyphen - start));
-                    long second = long.Parse(s.AsSpan(hyphen + 1, nextComma - (hyphen + 1)));
-                    comma = nextComma;
-
-                    first = long.Max(11, first);
-
-                    for (long i = first; i <= second; i++)
-                    {
-                        int digits = CountDigits(i);
-
-                        for (int probe = digits / 2; probe > 0; probe--)
+                        if (digits % probe != 0)
                         {
-                            if (digits % probe != 0)
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            if (IsInvalid(i, probe))
-                            {
-                                Utils.TraceForSample(i.ToString());
-                                ret += i;
-                                break;
-                            }
+                        if (IsInvalid(i, probe))
+                        {
+                            Utils.TraceForSample(i.ToString());
+                            ret += i;
+                            break;
                         }
                     }
                 }
