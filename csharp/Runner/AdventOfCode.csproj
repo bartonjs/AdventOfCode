@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Configurations>Debug;Release;Sample</Configurations>
     <PublishAoT>true</PublishAoT>
     <NoWarn>$(NoWarn);IL2026</NoWarn>
@@ -13,13 +13,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <TrimmerRootAssembly Include="AdventOfCode2024" />
+    <TrimmerRootAssembly Include="AdventOfCode2025" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\2021\AdventOfCode2021.csproj" />
     <ProjectReference Include="..\2022\AdventOfCode2022.csproj" />
     <ProjectReference Include="..\2023\AdventOfCode2023.csproj" />
     <ProjectReference Include="..\2024\AdventOfCode2024.csproj" />
+    <ProjectReference Include="..\2025\AdventOfCode2025.csproj" />
     <ProjectReference Include="..\Util\Util.csproj" />
   </ItemGroup>
 </Project>
