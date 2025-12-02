@@ -7,6 +7,21 @@ namespace AdventOfCode2025
     {
         private static readonly long[] s_pow10 = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000];
 
+        private static int CountDigits(long value)
+        {
+            int i = 2;
+
+            while (true)
+            {
+                if (value < s_pow10[i])
+                {
+                    return i;
+                }
+
+                i++;
+            }
+        }
+
         public static void Problem1()
         {
             long ret = 0;
@@ -40,13 +55,7 @@ namespace AdventOfCode2025
 
                     for (long i = first; i <= second; i++)
                     {
-                        double log10 = Math.Log10(i);
-                        int digits = (int)Math.Ceiling(log10);
-
-                        if (double.IsInteger(log10))
-                        {
-                            digits++;
-                        }
+                        int digits = CountDigits(i);
 
                         if (digits % 2 != 0)
                         {
@@ -102,13 +111,7 @@ namespace AdventOfCode2025
 
                     for (long i = first; i <= second; i++)
                     {
-                        double log10 = Math.Log10(i);
-                        int digits = (int)Math.Ceiling(log10);
-
-                        if (double.IsInteger(log10))
-                        {
-                            digits++;
-                        }
+                        int digits = CountDigits(i);
 
                         for (int probe = digits / 2; probe > 0; probe--)
                         {
