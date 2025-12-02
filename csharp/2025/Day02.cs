@@ -143,24 +143,18 @@ namespace AdventOfCode2025
                     return false;
                 }
 
-                (long div, long rem) = Math.DivRem(value, candidate);
+                long probe = candidate * mod + candidate;
 
-                if (rem != 0)
+                while (probe < value)
                 {
-                    return false;
-                }
-
-                while (div > 0)
-                {
-                    (div, rem) = Math.DivRem(div, mod);
-
-                    if (rem != 1)
+                    checked
                     {
-                        return false;
+                        probe *= mod;
+                        probe += candidate;
                     }
                 }
 
-                return true;
+                return probe == value;
             }
         }
     }
