@@ -149,7 +149,6 @@ namespace AdventOfCode2024
             List<State> path = new();
             HashSet<Point> allPoints = new HashSet<Point>();
             Dictionary<State, long> gScore = new();
-            long minCost = 0;
 
             world.TryFindCoveringSpaces(world.InitialState, world.FinalState, gScore, out long cost, path);
             Console.WriteLine($"Best path had cost {cost} and length {path.Count}");

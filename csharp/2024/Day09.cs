@@ -87,8 +87,6 @@ namespace AdventOfCode2024
 
             foreach (string s in Data.Enumerate())
             {
-                int max = 0;
-                int min = int.MaxValue;
                 bool data = true;
                 int id = 0;
 

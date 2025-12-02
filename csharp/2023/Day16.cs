@@ -161,6 +161,7 @@ namespace AdventOfCode2023
                             Direction.East => Direction.South,
                             Direction.South => Direction.East,
                             Direction.West => Direction.North,
+                            _ => throw new InvalidOperationException(),
                         };
 
                         break;
@@ -171,6 +172,7 @@ namespace AdventOfCode2023
                             Direction.East => Direction.North,
                             Direction.South => Direction.West,
                             Direction.West => Direction.South,
+                            _ => throw new InvalidOperationException(),
                         };
 
                         break;

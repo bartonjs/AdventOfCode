@@ -81,7 +81,9 @@ namespace AdventOfCode2024
 
                 for (int i = 0; i <= 7; i++)
                 {
+#pragma warning disable CS0675
                     a = (a >> 3 << 3) | i;
+#pragma warning restore CS0675
                     builder.Clear();
 
                     originalRegisters.AsSpan().CopyTo(registers);

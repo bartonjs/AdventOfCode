@@ -62,7 +62,6 @@ namespace AdventOfCode2024
             static void Discover(Point p, DynamicPlane<int> world, HashSet<Point> reached)
             {
                 int curP1 = world[p] + 1;
-                long ret = 0;
 
                 if (curP1 > 9)
                 {
