@@ -50,7 +50,7 @@ namespace AdventOfCode2025
 
                         if (digits % 2 != 0)
                         {
-                            i = (long)Math.Pow(10, digits) - 1;
+                            i = s_pow10[digits] - 1;
                             continue;
                         }
 
