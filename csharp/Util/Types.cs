@@ -113,6 +113,20 @@ namespace AdventOfCode.Util
             yield return West();
         }
 
+        public IEnumerable<Point> Get8Neighbors()
+        {
+            Point north = North();
+            yield return north.West();
+            yield return north;
+            yield return north.East();
+            yield return East();
+            Point south = South();
+            yield return south.East();
+            yield return south;
+            yield return south.West();
+            yield return West();
+        }
+
         public IEnumerable<Point> GetNeighbors(Directions2D directions)
         {
             if ((directions & ~AllDirections) != 0)
