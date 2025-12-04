@@ -47,7 +47,7 @@ namespace AdventOfCode2025
 
             foreach (string s in Data.Enumerate())
             {
-                long joltage = Joltage(s, 0, 12, []);
+                long joltage = Joltage(s, 0, 12);
                 Utils.TraceForSample($"{s} => {joltage}");
                 ret += joltage;
             }
@@ -55,36 +55,21 @@ namespace AdventOfCode2025
             Console.WriteLine(ret);
         }
 
-        internal static long Joltage(string s, int startIdx, int level, Dictionary<object, long> cache, long carryIn = 0)
+        internal static long Joltage(string s, int startIdx, int level)
         {
-            int last = s.Length - level;
-            long ret = 0;
-
-            if (level == 0)
-                return carryIn;
-
-            object key = (startIdx, level, carryIn);
-
-            if (cache.TryGetValue(key, out long prev))
-                return prev;
-
-            for (int i = startIdx; i <= last; i++)
+            if (level <= 0)
             {
-                long loc = s[i] - '0';
-                loc *= (long)Math.Pow(10, level - 1);
-
-                if (loc * 10 - 1 < ret)
-                {
-                    continue;
-                }
-
-                loc = Joltage(s, i + 1, level - 1, cache, loc);
-                ret = long.Max(ret, loc);
+                return 0;
             }
 
-            ret += carryIn;
-            cache[key] = ret;
-            return ret;
+            int levelM1 = level - 1;
+            int endIdx = s.Length - startIdx - levelM1;
+            (char val, int idx) = s.Skip(startIdx).Take(endIdx).MaxWithIndex();
+            idx += startIdx;
+
+            long hereValue = (val - '0') * Utils.Pow10(levelM1);
+
+            return hereValue + Joltage(s, idx + 1, levelM1);
         }
     }
 }

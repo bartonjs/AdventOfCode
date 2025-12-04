@@ -63,6 +63,29 @@ namespace AdventOfCode.Util
             7573, 7577, 7583, 7589, 7591, 7603, 7607, 7621, 7639, 7643, 7649, 7669, 7673, 7681, 7687, 7691, 7699, 7703, 7717, 7723,
             7727, 7741, 7753, 7757, 7759, 7789, 7793, 7817, 7823, 7829, 7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907, 7919,
         };
+
+        private static readonly long[] s_pow10 = [
+            1,
+            10,
+            100,
+            1000,
+            10000,
+            100000,
+            1000000,
+            10000000,
+            100000000,
+            1000000000,
+            10000000000,
+            100000000000,
+            1000000000000,
+            10000000000000,
+            100000000000000,
+            1000000000000000,
+            10000000000000000,
+            100000000000000000,
+            1000000000000000000,
+        ];
+
         public static long ParseBinary(string input)
         {
             long value = 0;
@@ -267,6 +290,26 @@ namespace AdventOfCode.Util
             return plane.Print(c => c);
         }
 
+        public static (T Value, int Index) MaxWithIndex<T>(this IEnumerable<T> source) where T : IComparisonOperators<T, T, bool>
+        {
+            int idx = -1;
+            T max = default;
+            int pos = 0;
+
+            foreach (T item in source)
+            {
+                if (idx < 0 || item > max)
+                {
+                    max = item;
+                    idx = pos;
+                }
+
+                pos++;
+            }
+
+            return (max, idx);
+        }
+
         /// <summary>
         /// Computes the area of a polygon described by a series of points.
         /// </summary>
@@ -438,6 +481,34 @@ namespace AdventOfCode.Util
         {
             ref T first = ref Unsafe.As<byte, T>(ref MemoryMarshal.GetArrayDataReference(array));
             return MemoryMarshal.CreateSpan(ref first, array.Length);
+        }
+
+        public static long Pow10(int exponent)
+        {
+            return s_pow10[exponent];
+        }
+
+        public static int CountDigits(int value)
+        {
+            if (value < 0)
+            {
+                return CountDigits(-value);
+            }
+
+            if (value == 0)
+            {
+                return 1;
+            }
+
+            for (int i = 0; i < s_pow10.Length; i++)
+            {
+                if (value < s_pow10[i])
+                {
+                    return i;
+                }
+            }
+
+            return s_pow10.Length;
         }
     }
 }
