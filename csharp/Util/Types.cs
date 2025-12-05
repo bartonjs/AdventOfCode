@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -596,5 +599,178 @@ namespace AdventOfCode.Util
         public IEnumerable<T> Keys => _data.Keys;
 
         public Dictionary<T, HashSet<T>>.Enumerator GetEnumerator() => _data.GetEnumerator();
+    }
+
+    public struct Interval
+        : IComparable<Interval>, IEquatable<Interval>
+    {
+        public long Low;
+        public long High;
+
+        internal Interval(long low, long high)
+        {
+            Low = low;
+            High = high;
+        }
+
+        public readonly void Deconstruct(out long low, out long high)
+        {
+            low = Low;
+            high = High;
+        }
+
+        public readonly int CompareTo(Interval other)
+        {
+            int comparison = Low.CompareTo(other.Low);
+
+            if (comparison == 0)
+            {
+                comparison = High.CompareTo(other.High);
+            }
+
+            return comparison;
+        }
+
+        public readonly bool Equals(Interval other)
+        {
+            return Low == other.Low && High == other.High;
+        }
+
+        public readonly bool Overlaps(Interval other)
+        {
+            return High >= other.Low && Low <= other.High;
+        }
+
+        public void AbsorbUnion(Interval other)
+        {
+            Low = long.Min(Low, other.Low);
+            High = long.Max(High, other.High);
+        }
+
+        public readonly bool Contains(Interval interval)
+        {
+            return Low <= interval.Low && High >= interval.High;
+        }
+
+        public readonly Interval Widen()
+        {
+            return new Interval(Low - 1, High + 1);
+        }
+
+        public readonly long WidthExclusive => High - Low;
+
+        public readonly long WidthInclusive => WidthExclusive + 1;
+    }
+
+    public class IntervalSet : IEnumerable<Interval>
+    {
+        private readonly List<Interval> _intervals = new(16);
+
+        public int Count => _intervals.Count;
+
+        public void AddInterval(long low, long high)
+        {
+            Add(new Interval(low, high));
+        }
+
+        public void Add(Interval interval)
+        {
+            // Because we are storing integers, [4, 7] and [8, 11] can be merged to [4, 11]
+            // So if we're asked to look up [5, 10], search [4, 11]
+            Interval searchInterval = interval.Widen();
+
+            int idx = _intervals.BinarySearch(searchInterval, OverlapsComparer.Instance);
+
+            if (idx < 0)
+            {
+                _intervals.Insert(~idx, interval);
+            }
+            else
+            {
+                Span<Interval> intervalSpan = CollectionsMarshal.AsSpan(_intervals);
+                Debug.Assert(searchInterval.Overlaps(intervalSpan[idx]));
+
+                if (intervalSpan[idx].Contains(interval))
+                {
+                    return;
+                }
+
+                // Since we could have overlapped multiple, back up to the first one we overlap.
+                if (idx > 0)
+                {
+                    while (idx > 0 && intervalSpan[idx].Overlaps(searchInterval))
+                    {
+                        idx--;
+                    }
+
+                    idx++;
+                }
+
+                Debug.Assert(interval.Overlaps(intervalSpan[idx]));
+                ref Interval updated = ref intervalSpan[idx];
+                updated.AbsorbUnion(interval);
+
+                Interval updatedSearch = updated;
+                updatedSearch.AbsorbUnion(searchInterval);
+
+                int checkIdx = idx + 1;
+
+                while (checkIdx < intervalSpan.Length && intervalSpan[checkIdx].Overlaps(updatedSearch))
+                {
+                    updated.AbsorbUnion(intervalSpan[checkIdx]);
+                    updatedSearch.AbsorbUnion(intervalSpan[checkIdx]);
+                    checkIdx++;
+                }
+
+                checkIdx--;
+
+                if (checkIdx > idx)
+                {
+                    _intervals.RemoveRange(idx + 1, checkIdx - idx);
+                }
+            }
+        }
+
+        public void Clear()
+        {
+            _intervals.Clear();
+        }
+
+        public IEnumerator<Interval> GetEnumerator()
+        {
+            return _intervals.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public bool Contains(long value)
+        {
+            Interval searchInterval = new Interval(value, value);
+            int idx = _intervals.BinarySearch(searchInterval, OverlapsComparer.Instance);
+            return idx >= 0;
+        }
+
+        private class OverlapsComparer : IComparer<Interval>
+        {
+            internal static OverlapsComparer Instance { get; } = new OverlapsComparer();
+
+            public int Compare(Interval x, Interval y)
+            {
+                if (x.High < y.Low)
+                {
+                    return -1;
+                }
+
+                if (x.Low > y.High)
+                {
+                    return 1;
+                }
+
+                return 0;
+            }
+        }
     }
 }
