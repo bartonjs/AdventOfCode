@@ -109,6 +109,21 @@ namespace AdventOfCode.Util
             Console.WriteLine(message);
         }
 
+        public static long Product(this IEnumerable<long> source)
+        {
+            long product = 1;
+
+            foreach (long val in source)
+            {
+                checked
+                {
+                    product *= val;
+                }
+            }
+
+            return product;
+        }
+
         public static long Product<T>(this IEnumerable<T> source, Func<T, long> selector)
         {
             long product = 1;
