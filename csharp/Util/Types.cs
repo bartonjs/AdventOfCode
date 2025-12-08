@@ -249,6 +249,17 @@ namespace AdventOfCode.Util
             return Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
         }
 
+        public double EuclidianDistance(Point3 other)
+        {
+            double part = X - other.X;
+            double accum = part * part;
+            part = Y - other.Y;
+            accum += part * part;
+            part = Z - other.Z;
+            accum += part * part;
+            return double.Sqrt(accum);
+        }
+
         public override string ToString() => $"({X}, {Y}, {Z})";
 
         public bool Equals(Point3 other)
