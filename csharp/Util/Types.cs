@@ -244,12 +244,12 @@ namespace AdventOfCode.Util
             Z = z;
         }
 
-        public int ManhattanDistance(Point3 other)
+        public readonly int ManhattanDistance(Point3 other)
         {
             return Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
         }
 
-        public double EuclidianDistance(Point3 other)
+        public readonly double EuclideanDistance(Point3 other)
         {
             double part = X - other.X;
             double accum = part * part;
@@ -260,19 +260,19 @@ namespace AdventOfCode.Util
             return double.Sqrt(accum);
         }
 
-        public override string ToString() => $"({X}, {Y}, {Z})";
+        public readonly override string ToString() => $"({X}, {Y}, {Z})";
 
-        public bool Equals(Point3 other)
+        public readonly bool Equals(Point3 other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;
         }
 
-        public override bool Equals(object obj)
+        public readonly override bool Equals(object obj)
         {
             return obj is Point3 other && Equals(other);
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);
         }
@@ -294,24 +294,35 @@ namespace AdventOfCode.Util
             Z = z;
         }
 
-        public long ManhattanDistance(LongPoint3 other)
+        public readonly long ManhattanDistance(LongPoint3 other)
         {
             return Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
         }
 
-        public override string ToString() => $"({X}, {Y}, {Z})";
+        public readonly double EuclideanDistance(Point3 other)
+        {
+            double part = X - other.X;
+            double accum = part * part;
+            part = Y - other.Y;
+            accum += part * part;
+            part = Z - other.Z;
+            accum += part * part;
+            return double.Sqrt(accum);
+        }
 
-        public bool Equals(LongPoint3 other)
+        public readonly override string ToString() => $"({X}, {Y}, {Z})";
+
+        public readonly bool Equals(LongPoint3 other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;
         }
 
-        public override bool Equals(object obj)
+        public readonly override bool Equals(object obj)
         {
             return obj is LongPoint3 other && Equals(other);
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);
         }
