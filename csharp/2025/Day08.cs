@@ -7,9 +7,10 @@ namespace AdventOfCode2025
 {
     public class Day08
     {
-        internal static List<Point3> Load()
+        private static List<Point3WithId> Load()
         {
-            List<Point3> points = new();
+            List<Point3WithId> points = new();
+            int nextId = 0;
 
             foreach (string s in Data.Enumerate())
             {
@@ -17,10 +18,13 @@ namespace AdventOfCode2025
                 int comma2 = s.IndexOf(',', comma1 + 1);
 
                 points.Add(
-                    new Point3(
+                    new Point3WithId(
                         int.Parse(s.AsSpan(0, comma1)),
                         int.Parse(s.AsSpan(comma1 + 1, comma2 - comma1 - 1)),
-                        int.Parse(s.AsSpan(comma2 + 1))));
+                        int.Parse(s.AsSpan(comma2 + 1)),
+                        nextId));
+
+                nextId++;
             }
 
             return points;
@@ -35,75 +39,68 @@ namespace AdventOfCode2025
                 1000;
 #endif
 
-            List<Point3> points = Load();
-            List<(Point3 A, Point3 B, double Distance)> pairs = new(points.Count * points.Count);
+            List<Point3WithId> points = Load();
+            List<(Point3WithId A, Point3WithId B, double Distance)> pairs = new(points.Count * points.Count);
 
             for (int i = 0; i < points.Count; i++)
             {
-                Point3 a = points[i];
+                Point3WithId a = points[i];
 
                 for (int j = i + 1; j < points.Count; j++)
                 {
-                    Point3 b = points[j];
+                    Point3WithId b = points[j];
 
-                    pairs.Add((a, b, a.EuclidianDistance(b)));
+                    pairs.Add((a, b, a.Point.EuclidianDistance(b.Point)));
                 }
             }
 
             pairs.Sort((x, y) => double.Sign(x.Distance - y.Distance));
 
-            Dictionary<Point3, CircuitAssignment> circuits = new();
-            int nextCircuit = 0;
+            int[] circuits = new int[points.Count];
+            int nextCircuit = 1;
 
             for (int i = 0; i < Iters; i++)
             {
-                (Point3 a, Point3 b, _) = pairs[i];
+                (Point3WithId a, Point3WithId b, _) = pairs[i];
+                int circuitA = circuits[a.Id];
+                int circuitB = circuits[b.Id];
 
-                if (circuits.TryGetValue(a, out CircuitAssignment circuitA))
+                if (circuitA != 0)
                 {
-                    if (circuits.TryGetValue(b, out CircuitAssignment circuitB))
+                    if (circuitB != 0)
                     {
-                        if (circuitA.Num != circuitB.Num)
+                        if (circuitB != circuitA)
                         {
-                            int from = circuitB.Num;
-                            int to = circuitA.Num;
-
-                            foreach (var kvp in circuits)
-                            {
-                                if (kvp.Value.Num == from)
-                                {
-                                    kvp.Value.Num = to;
-                                }
-                            }
-
-                            circuitB.Num = circuitA.Num;
+                            Utils.TraceForSample($"Merge {circuitB} => {circuitA}");
+                            Reassign(circuits, circuitB, circuitA);
                         }
                     }
                     else
                     {
-                        circuits[b] = circuitA;
+                        Utils.TraceForSample($"Assigning {b.Id} to existing circuit {circuitA}");
+                        circuits[b.Id] = circuitA;
                     }
                 }
-                else if (circuits.TryGetValue(b, out CircuitAssignment circuitB))
+                else if (circuitB != 0)
                 {
-                    circuits[a] = circuitB;
+                    Utils.TraceForSample($"Assigning {a.Id} to existing circuit {circuitB}");
+                    circuits[a.Id] = circuitB;
                 }
                 else
                 {
-                    CircuitAssignment assign = new CircuitAssignment(nextCircuit);
+                    Utils.TraceForSample($"Forming circuit {nextCircuit} from {a.Id} and {b.Id}");
+                    circuits[a.Id] = nextCircuit;
+                    circuits[b.Id] = nextCircuit;
                     nextCircuit++;
-                    circuits[a] = assign;
-                    circuits[b] = assign;
                 }
             }
 
-            var orderedPairs = circuits.GroupBy(kvp => kvp.Value.Num).Select(gr => (gr, gr.Count())).OrderByDescending(p => p.Item2);
             long ret = 1;
 
-            foreach (var pair in orderedPairs.Take(3))
+            foreach (var kvp in circuits.Where(x => x != 0).CountBy(x => x).OrderByDescending(kvp => kvp.Value).Take(3))
             {
-                long count = pair.Item2;
-                ret *= count;
+                //Console.WriteLine($"Found a circuit with {kvp.Value} members");
+                ret *= kvp.Value;
             }
 
             Console.WriteLine(ret);
@@ -111,7 +108,7 @@ namespace AdventOfCode2025
 
         internal static void Problem2()
         {
-            List<Point3> points = Load();
+            List<Point3> points = Load().Select(p => p.Point).ToList();
             List<(Point3 A, Point3 B, double Distance)> pairs = new(points.Count * points.Count);
 
             for (int i = 0; i < points.Count; i++)
@@ -192,6 +189,17 @@ namespace AdventOfCode2025
             Console.WriteLine("No solution");
         }
 
+        private static void Reassign(int[] circuits, int from, int to)
+        {
+            for (int i = circuits.Length - 1; i >= 0; i--)
+            {
+                if (circuits[i] == from)
+                {
+                    circuits[i] = to;
+                }
+            }
+        }
+
         private class CircuitAssignment
         {
             internal int Num;
@@ -199,6 +207,18 @@ namespace AdventOfCode2025
             internal CircuitAssignment(int num)
             {
                 Num = num;
+            }
+        }
+
+        private struct Point3WithId
+        {
+            public readonly Point3 Point;
+            public readonly int Id;
+
+            public Point3WithId(int x, int y, int z, int id)
+            {
+                Point = new Point3(x, y, z);
+                Id = id;
             }
         }
     }
