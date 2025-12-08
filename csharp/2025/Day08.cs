@@ -40,7 +40,7 @@ namespace AdventOfCode2025
 #endif
 
             List<Point3WithId> points = Load();
-            List<(Point3WithId A, Point3WithId B, double Distance)> pairs = new(points.Count * points.Count);
+            List<DistancePair> pairs = new(points.Count * points.Count);
 
             for (int i = 0; i < points.Count; i++)
             {
@@ -50,18 +50,18 @@ namespace AdventOfCode2025
                 {
                     Point3WithId b = points[j];
 
-                    pairs.Add((a, b, a.Point.EuclidianDistance(b.Point)));
+                    pairs.Add(new DistancePair(a, b));
                 }
             }
 
-            pairs.Sort((x, y) => double.Sign(x.Distance - y.Distance));
+            pairs.Sort();
 
             int[] circuits = new int[points.Count];
             int nextCircuit = 1;
 
             for (int i = 0; i < Iters; i++)
             {
-                (Point3WithId a, Point3WithId b, _) = pairs[i];
+                (Point3WithId a, Point3WithId b) = pairs[i];
                 int circuitA = circuits[a.Id];
                 int circuitB = circuits[b.Id];
 
@@ -108,81 +108,51 @@ namespace AdventOfCode2025
 
         internal static void Problem2()
         {
-            List<Point3> points = Load().Select(p => p.Point).ToList();
-            List<(Point3 A, Point3 B, double Distance)> pairs = new(points.Count * points.Count);
+            List<Point3WithId> points = Load();
+            List<DistancePair> pairs = new(points.Count * points.Count);
 
             for (int i = 0; i < points.Count; i++)
             {
-                Point3 a = points[i];
+                Point3WithId a = points[i];
 
                 for (int j = i + 1; j < points.Count; j++)
                 {
-                    Point3 b = points[j];
+                    Point3WithId b = points[j];
 
-                    pairs.Add((a, b, a.EuclidianDistance(b)));
+                    pairs.Add(new DistancePair(a, b));
                 }
             }
 
-            pairs.Sort((x, y) => double.Sign(x.Distance - y.Distance));
+            pairs.Sort();
 
-            Dictionary<Point3, CircuitAssignment> circuits = new();
-            int nextCircuit = 0;
+            int[] circuits = new int[points.Count];
 
-            foreach (Point3 point in points)
+            for (int i = circuits.Length - 1; i >= 0; i--)
             {
-                circuits[point] = new CircuitAssignment(nextCircuit);
-                nextCircuit++;
+                circuits[i] = i;
             }
 
-            int circuitCount = nextCircuit;
+            int circuitCount = circuits.Length;
 
-            foreach ((Point3 a, Point3 b, _) in pairs)
+            foreach ((Point3WithId a, Point3WithId b) in pairs)
             {
-                if (circuits.TryGetValue(a, out CircuitAssignment circuitA))
+                int circuitA = circuits[a.Id];
+                int circuitB = circuits[b.Id];
+
+                if (circuitB != circuitA)
                 {
-                    if (circuits.TryGetValue(b, out CircuitAssignment circuitB))
+                    Utils.TraceForSample($"Merge {circuitB} => {circuitA} ({circuitCount} total)");
+
+                    if (circuitCount == 2)
                     {
-                        if (circuitA.Num != circuitB.Num)
-                        {
-                            if (circuitCount == 2)
-                            {
-                                long ret = a.X;
-                                ret *= b.X;
-                                Console.WriteLine(ret);
-                                return;
-                            }
-
-                            int from = circuitB.Num;
-                            int to = circuitA.Num;
-
-                            if (from < to)
-                            {
-                                (from, to) = (to, from);
-                            }
-
-                            foreach (var kvp in circuits)
-                            {
-                                if (kvp.Value.Num == from)
-                                {
-                                    kvp.Value.Num = to;
-                                }
-                            }
-
-                            circuitCount--;
-                        }
+                        long ret = a.Point.X;
+                        ret *= b.Point.X;
+                        Console.WriteLine(ret);
+                        return;
                     }
-                    else
-                    {
-                        circuits[b] = circuitA;
-                    }
-                }
-                else if (circuits.TryGetValue(b, out CircuitAssignment circuitB))
-                {
-                    circuits[a] = circuitB;
-                }
-                else
-                {
-                    throw new InvalidOperationException();
+
+                    Reassign(circuits, circuitB, circuitA);
+                    circuitCount--;
                 }
             }
 
@@ -200,16 +170,6 @@ namespace AdventOfCode2025
             }
         }
 
-        private class CircuitAssignment
-        {
-            internal int Num;
-
-            internal CircuitAssignment(int num)
-            {
-                Num = num;
-            }
-        }
-
         private struct Point3WithId
         {
             public readonly Point3 Point;
@@ -219,6 +179,31 @@ namespace AdventOfCode2025
             {
                 Point = new Point3(x, y, z);
                 Id = id;
+            }
+        }
+
+        private readonly struct DistancePair : IComparable<DistancePair>
+        {
+            private readonly Point3WithId A;
+            private readonly Point3WithId B;
+            private readonly double Dist;
+
+            internal DistancePair(Point3WithId a, Point3WithId b)
+            {
+                A = a;
+                B = b;
+                Dist = a.Point.EuclideanDistance(b.Point);
+            }
+
+            internal void Deconstruct(out Point3WithId a, out Point3WithId b)
+            {
+                a = A;
+                b = B;
+            }
+
+            public int CompareTo(DistancePair other)
+            {
+                return Dist.CompareTo(other.Dist);
             }
         }
     }
