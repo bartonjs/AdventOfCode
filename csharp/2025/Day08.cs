@@ -182,7 +182,9 @@ namespace AdventOfCode2025
             }
         }
 
-        private readonly struct DistancePair : IComparable<DistancePair>
+        // As a class, 8-2 is 154ms JIT, 115ms AoT
+        // As a readonly struct, 200ms JIT, 80ms AoT.
+        private class DistancePair : IComparable<DistancePair>
         {
             private readonly Point3WithId A;
             private readonly Point3WithId B;
