@@ -21,6 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Z3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Util\Util.csproj" />
   </ItemGroup>
 
